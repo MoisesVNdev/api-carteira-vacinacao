@@ -1,0 +1,237 @@
+# ============================================================================
+# DOCKER COMPOSE - SPRING BOOT + POSTGRESQL
+# ============================================================================
+# Este arquivo configura um ambiente de desenvolvimento completo e seguro
+# para uma aplicação Spring Boot com PostgreSQL.
+#
+# Uso: docker-compose up -d
+# Para: docker-compose down
+# Logs: docker-compose logs -f
+# ============================================================================
+
+services:
+  # ==========================================================================
+  # SERVIÇO: POSTGRESQL 16 ALPINE
+  # ==========================================================================
+  # Banco de dados principal da aplicação
+  # Utiliza a versão Alpine (mais leve e segura)
+  postgres:
+    image: postgres:16-alpine
+    container_name: ${COMPOSE_PROJECT_NAME:-app}-postgres
+    
+    # Reinicia automaticamente em caso de falha
+    restart: unless-stopped
+    
+    # -----------------------------------------------------------------------
+    # VARIÁVEIS DE AMBIENTE (Credenciais via .env)
+    # -----------------------------------------------------------------------
+    environment:
+      # Nome do banco de dados
+      POSTGRES_DB: ${POSTGRES_DB}
+      
+      # Usuário do banco (NÃO usar 'postgres' em produção)
+      POSTGRES_USER: ${POSTGRES_USER}
+      
+      # Senha do banco (obrigatório)
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      
+      # Timezone do banco
+      TZ: ${TZ:-America/Sao_Paulo}
+      
+      # Encoding padrão (UTF-8)
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=pt_BR.UTF-8"
+    
+    # -----------------------------------------------------------------------
+    # VOLUMES - Persistência de Dados
+    # -----------------------------------------------------------------------
+    volumes:
+      # Volume nomeado para dados do PostgreSQL
+      # Os dados persistem mesmo após 'docker-compose down'
+      - postgres_data:/var/lib/postgresql/data
+    
+    # -----------------------------------------------------------------------
+    # PORTAS
+    # -----------------------------------------------------------------------
+    ports:
+      # DESENVOLVIMENTO: Expõe a porta 5432 para acesso local
+      # PRODUÇÃO: Remova esta linha para não expor o banco externamente
+      - "${POSTGRES_PORT:-5432}:5432"
+    
+    # -----------------------------------------------------------------------
+    # HEALTH CHECK
+    # -----------------------------------------------------------------------
+    # Verifica se o banco está pronto para aceitar conexões
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    
+    # -----------------------------------------------------------------------
+    # REDE
+    # -----------------------------------------------------------------------
+    networks:
+      - app-network
+    
+    # -----------------------------------------------------------------------
+    # SEGURANÇA
+    # -----------------------------------------------------------------------
+    # Evita escalação de privilégios
+    # security_opt:
+    #   - no-new-privileges:true
+    
+    # Limita capacidades do kernel (princípio do menor privilégio)
+    # cap_drop:
+    #   - ALL
+    # cap_add:
+    #   - CHOWN
+    #   - FOWNER
+    #   - SETGID
+    #   - SETUID
+
+  # ==========================================================================
+  # SERVIÇO: APLICAÇÃO SPRING BOOT
+  # ==========================================================================
+  app:
+    # Constrói a imagem a partir do Dockerfile
+    build:
+      context: .
+      dockerfile: Dockerfile
+      
+      # Argumentos de build
+      args:
+        # Versão do Java (deve corresponder à versão do projeto)
+        JAVA_VERSION: 21
+    
+    container_name: ${COMPOSE_PROJECT_NAME:-app}-spring
+    
+    # Reinicia automaticamente em caso de falha
+    restart: unless-stopped
+    
+    # -----------------------------------------------------------------------
+    # DEPENDÊNCIAS
+    # -----------------------------------------------------------------------
+    # Aguarda o PostgreSQL estar saudável antes de iniciar
+    depends_on:
+      postgres:
+        condition: service_healthy
+    
+    # -----------------------------------------------------------------------
+    # VARIÁVEIS DE AMBIENTE
+    # -----------------------------------------------------------------------
+    environment:
+      # Perfil Spring ativo (dev, prod, test)
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILE:-dev}
+      
+      # Configuração do banco de dados
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      
+      # Driver do PostgreSQL
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      
+      # JPA/Hibernate
+      SPRING_JPA_HIBERNATE_DDL_AUTO: ${JPA_DDL_AUTO:-update}
+      SPRING_JPA_SHOW_SQL: ${JPA_SHOW_SQL:-true}
+      SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL: true
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
+      
+      # Timezone da JVM
+      TZ: ${TZ:-America/Sao_Paulo}
+      
+      # Configurações de memória da JVM (ajuste conforme necessário)
+      JAVA_OPTS: >
+        -Xms256m
+        -Xmx512m
+        -XX:+UseG1GC
+        -XX:MaxGCPauseMillis=200
+        -Djava.security.egd=file:/dev/./urandom
+      
+      # Porta da aplicação
+      SERVER_PORT: 8080
+    
+    # -----------------------------------------------------------------------
+    # VOLUMES
+    # -----------------------------------------------------------------------
+    volumes:
+      # HOT RELOAD: Monta o código-fonte para desenvolvimento
+      # Remove em produção
+      - ./src:/app/src:ro
+      - ./pom.xml:/app/pom.xml:ro
+      
+      # Cache do Maven (acelera builds)
+      - maven_cache:/root/.m2
+    
+    # -----------------------------------------------------------------------
+    # PORTAS
+    # -----------------------------------------------------------------------
+    ports:
+      # Expõe a aplicação na porta 8080
+      - "${APP_PORT:-8080}:8080"
+      
+      # (Opcional) Porta de debug remoto
+      # Descomente para debug
+      # - "${DEBUG_PORT:-5005}:5005"
+    
+    # -----------------------------------------------------------------------
+    # HEALTH CHECK
+    # -----------------------------------------------------------------------
+    # Verifica se a aplicação está respondendo
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    
+    # -----------------------------------------------------------------------
+    # REDE
+    # -----------------------------------------------------------------------
+    networks:
+      - app-network
+    
+    # -----------------------------------------------------------------------
+    # SEGURANÇA
+    # -----------------------------------------------------------------------
+    # Executa como usuário não-root (definido no Dockerfile)
+    # user: "1000:1000"  # Descomente se necessário
+    
+    # Evita escalação de privilégios
+    security_opt:
+      - no-new-privileges:true
+    
+    # Limita capacidades do kernel
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+
+# ============================================================================
+# VOLUMES
+# ============================================================================
+# Volumes nomeados para persistência de dados
+volumes:
+  # Dados do PostgreSQL
+  postgres_data:
+    driver: local
+    name: ${COMPOSE_PROJECT_NAME:-app}_postgres_data
+  
+  # Cache do Maven (acelera builds)
+  maven_cache:
+    driver: local
+    name: ${COMPOSE_PROJECT_NAME:-app}_maven_cache
+
+# ============================================================================
+# REDES
+# ============================================================================
+# Rede isolada para comunicação entre contêineres
+networks:
+  app-network:
+    driver: bridge
+    name: ${COMPOSE_PROJECT_NAME:-app}_network
+    # Configurações adicionais de segurança
+    ipam:
+      config:
+        - subnet: 172.25.0.0/24

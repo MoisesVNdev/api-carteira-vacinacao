@@ -1,0 +1,188 @@
+# ============================================================================
+# APPLICATION.YML - CONFIGURAÇÕES DO SPRING BOOT
+# ============================================================================
+# Local: src/main/resources/application.yml
+# 
+# Este arquivo contém as configurações da aplicação Spring Boot.
+# As variáveis de ambiente definidas no docker-compose.yml têm precedência.
+# ============================================================================
+
+spring:
+  # --------------------------------------------------------------------------
+  # CONFIGURAÇÃO DA APLICAÇÃO
+  # --------------------------------------------------------------------------
+  application:
+    name: minha-api
+  
+  # --------------------------------------------------------------------------
+  # DATASOURCE - POSTGRESQL
+  # --------------------------------------------------------------------------
+  # Estas configurações podem ser sobrescritas pelas variáveis de ambiente
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/meu_banco}
+    username: ${SPRING_DATASOURCE_USERNAME:meu_usuario}
+    password: ${SPRING_DATASOURCE_PASSWORD:minha_senha}
+    driver-class-name: org.postgresql.Driver
+    
+    # Pool de conexões HikariCP (padrão do Spring Boot)
+    hikari:
+      # Número mínimo de conexões idle
+      minimum-idle: 5
+      
+      # Número máximo de conexões no pool
+      maximum-pool-size: 20
+      
+      # Tempo máximo que uma conexão pode ficar idle (30 minutos)
+      idle-timeout: 1800000
+      
+      # Timeout da conexão (30 segundos)
+      connection-timeout: 30000
+      
+      # Tempo máximo de vida de uma conexão (30 minutos)
+      max-lifetime: 1800000
+      
+      # Nome do pool (para logs)
+      pool-name: HikariPoolPostgres
+      
+      # Teste de conexão
+      connection-test-query: SELECT 1
+  
+  # --------------------------------------------------------------------------
+  # JPA / HIBERNATE
+  # --------------------------------------------------------------------------
+  jpa:
+    # Estratégia de gerenciamento do schema
+    # update: Atualiza o schema (recomendado para desenvolvimento)
+    # validate: Valida o schema sem alterações (recomendado para produção)
+    hibernate:
+      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:update}
+    
+    # Exibir SQL no console
+    show-sql: ${SPRING_JPA_SHOW_SQL:false}
+    
+    # Propriedades adicionais do Hibernate
+    properties:
+      hibernate:
+        # Dialeto do PostgreSQL
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        
+        # Formata o SQL para melhor legibilidade
+        format_sql: true
+        
+        # Usa nomes de colunas físicos
+        physical_naming_strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+        
+        # Configurações de performance
+        jdbc:
+          # Tamanho do lote para operações em massa
+          batch_size: 20
+          
+          # Ordena inserts para melhor performance
+          order_inserts: true
+          order_updates: true
+          batch_versioned_data: true
+        
+        # Cache de segundo nível (desabilitado por padrão)
+        cache:
+          use_second_level_cache: false
+          use_query_cache: false
+  
+  # --------------------------------------------------------------------------
+  # DEVTOOLS (Hot Reload)
+  # --------------------------------------------------------------------------
+  # Descomente para habilitar o DevTools em desenvolvimento
+  # devtools:
+  #   restart:
+  #     enabled: true
+  #     additional-paths: src/main/java
+  #     exclude: static/**,public/**
+  #   livereload:
+  #     enabled: true
+
+# ============================================================================
+# CONFIGURAÇÕES DO SERVIDOR
+# ============================================================================
+server:
+  # Porta da aplicação
+  port: ${SERVER_PORT:8080}
+  
+  # Configurações de compressão
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
+    min-response-size: 1024
+  
+  # Configurações de erro
+  error:
+    # Não incluir stack trace nas respostas
+    include-stacktrace: never
+    # Não incluir mensagem de exceção
+    include-message: never
+
+# ============================================================================
+# CONFIGURAÇÕES DE LOGGING
+# ============================================================================
+logging:
+  level:
+    # Nível de log da aplicação
+    root: INFO
+    
+    # Logs do Spring Framework
+    org.springframework.web: INFO
+    org.springframework.security: INFO
+    
+    # Logs do Hibernate
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    
+    # Logs da sua aplicação
+    com.example: DEBUG
+  
+  # Padrão de log
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# ============================================================================
+# SPRING ACTUATOR (Monitoramento e Health Checks)
+# ============================================================================
+management:
+  endpoints:
+    web:
+      # Expõe endpoints do Actuator
+      exposure:
+        include: health,info,metrics,prometheus
+      
+      # Base path dos endpoints
+      base-path: /actuator
+  
+  endpoint:
+    health:
+      # Exibe detalhes do health check
+      show-details: when-authorized
+      
+      # Habilita health checks para dependências
+      probes:
+        enabled: true
+  
+  health:
+    # Health check do banco de dados
+    db:
+      enabled: true
+    
+    # Health check de disco
+    diskspace:
+      enabled: true
+      threshold: 10MB
+
+# ============================================================================
+# OBSERVAÇÕES
+# ============================================================================
+# 1. Este arquivo serve como base para todas as configurações
+# 2. Crie arquivos específicos por ambiente:
+#    - application-dev.yml (desenvolvimento)
+#    - application-test.yml (testes)
+#    - application-prod.yml (produção)
+# 3. Ative o perfil com: SPRING_PROFILES_ACTIVE=dev
+# 4. Variáveis de ambiente têm precedência sobre estas configurações
+# ============================================================================
