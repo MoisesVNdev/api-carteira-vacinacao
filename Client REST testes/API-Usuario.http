@@ -1,0 +1,215 @@
+# =============================================================================
+# API - Carteira de Vacinação Digital
+# Entidade: Usuario
+# Controller: UsuarioController.java
+#
+# Como usar:
+#   - Ajuste @baseUrl caso sua API rode em porta ou host diferente.
+#   - Após criar um usuário, copie o "id" retornado e atualize @usuarioId.
+#   - Clique em "Send Request" acima de cada bloco para executá-lo.
+#
+# Ambientes alternativos:
+#   Crie um arquivo "http-client.env.json" na raiz do projeto para gerenciar
+#   múltiplos ambientes (dev, homologação, produção). Exemplo:
+#   {
+#     "dev":  { "baseUrl": "http://localhost:8080" },
+#     "hml":  { "baseUrl": "https://hml.api.seudominio.com" }
+#   }
+#   Com ele, as variáveis abaixo são sobrescritas automaticamente pelo ambiente
+#   selecionado no canto inferior direito do VS Code.
+# =============================================================================
+
+@baseUrl   = http://localhost:8080
+@usuarioId = 1
+
+
+# =============================================================================
+# POST /usuarios — CRIAÇÃO
+# =============================================================================
+
+### [POST] 1 - Criar usuário com sucesso
+# Espera: 201 Created
+# Retorna o usuário criado (sem o campo "senha").
+# Copie o "id" da resposta e atualize a variável @usuarioId no topo do arquivo.
+
+POST {{baseUrl}}/usuarios
+Content-Type: application/json
+
+{
+    "nomeCompleto": "João Silva",
+    "email": "joao.silva@email.com",
+    "senha": "Senha@2024"
+}
+
+###
+
+### [POST] 2 - Criar usuário com dados únicos via GUID dinâmico
+# Espera: 201 Created
+# O $guid garante um e-mail único a cada envio, útil para testes repetidos
+# sem precisar alterar o arquivo manualmente.
+
+POST {{baseUrl}}/usuarios
+Content-Type: application/json
+
+{
+    "nomeCompleto": "Usuário Teste",
+    "email": "usuario-{{$guid}}@email.com",
+    "senha": "Senha@2024"
+}
+
+###
+
+### [POST] 3 - Criar usuário com e-mail já cadastrado (duplicado)
+# Espera: 409 Conflict
+# Utiliza o mesmo e-mail do teste 1 para forçar a exceção EmailJaCadastradoException.
+
+POST {{baseUrl}}/usuarios
+Content-Type: application/json
+
+{
+    "nomeCompleto": "Maria Oliveira",
+    "email": "joao.silva@email.com",
+    "senha": "OutraSenha@99"
+}
+
+###
+
+### [POST] 4 - Criar usuário com e-mail em formato inválido
+# Espera: 400 Bad Request
+# Valida a anotação @Email no UsuarioRequestDTO.
+
+POST {{baseUrl}}/usuarios
+Content-Type: application/json
+
+{
+    "nomeCompleto": "Carlos Teste",
+    "email": "email-invalido-sem-arroba",
+    "senha": "Senha@2024"
+}
+
+###
+
+### [POST] 5 - Criar usuário com campos obrigatórios ausentes
+# Espera: 400 Bad Request
+# Valida as anotações @NotBlank nos três campos obrigatórios.
+# O body vazio fará o Bean Validation retornar todos os erros de uma vez.
+
+POST {{baseUrl}}/usuarios
+Content-Type: application/json
+
+{}
+
+
+# =============================================================================
+# GET /usuarios — LISTAGEM
+# =============================================================================
+
+### [GET] 6 - Listar todos os usuários
+# Espera: 200 OK com um array JSON (pode ser vazio se nenhum usuário foi criado).
+# Nenhum body é necessário em requisições GET.
+
+GET {{baseUrl}}/usuarios
+
+
+# =============================================================================
+# GET /usuarios/{id} — BUSCA POR ID
+# =============================================================================
+
+### [GET] 7 - Buscar usuário por ID existente
+# Espera: 200 OK com os dados do usuário (sem "senha").
+# Certifique-se de que @usuarioId corresponde a um ID existente no banco.
+
+GET {{baseUrl}}/usuarios/{{usuarioId}}
+
+###
+
+### [GET] 8 - Buscar usuário por ID inexistente
+# Espera: 404 Not Found
+# Força a exceção UsuarioNaoEncontradoException com um ID improvável.
+
+GET {{baseUrl}}/usuarios/999999
+
+
+# =============================================================================
+# PUT /usuarios/{id} — ATUALIZAÇÃO
+# =============================================================================
+
+### [PUT] 9 - Atualizar usuário existente com sucesso
+# Espera: 200 OK com os dados atualizados (sem "senha").
+# PUT exige o envio de TODOS os campos, pois substitui o recurso integralmente.
+
+PUT {{baseUrl}}/usuarios/{{usuarioId}}
+Content-Type: application/json
+
+{
+    "nomeCompleto": "João Silva Santos",
+    "email": "joao.santos@email.com",
+    "senha": "NovaSenha@2025"
+}
+
+###
+
+### [PUT] 10 - Atualizar usuário com e-mail já pertencente a outro usuário
+# Espera: 409 Conflict
+# Para este teste funcionar, é necessário que exista outro usuário com o e-mail
+# "joao.silva@email.com" (criado no teste 1) e que @usuarioId aponte para um ID diferente.
+# Ajuste o ID na URL manualmente se necessário.
+
+PUT {{baseUrl}}/usuarios/{{usuarioId}}
+Content-Type: application/json
+
+{
+    "nomeCompleto": "João Silva Santos",
+    "email": "joao.silva@email.com",
+    "senha": "NovaSenha@2025"
+}
+
+###
+
+### [PUT] 11 - Tentar atualizar usuário com dados inválidos
+# Espera: 400 Bad Request
+# Testa o Bean Validation no fluxo de atualização (mesmo DTO do POST).
+
+PUT {{baseUrl}}/usuarios/{{usuarioId}}
+Content-Type: application/json
+
+{
+    "nomeCompleto": "",
+    "email": "nao-e-um-email",
+    "senha": ""
+}
+
+###
+
+### [PUT] 12 - Tentar atualizar usuário com ID inexistente
+# Espera: 404 Not Found
+# Força a exceção UsuarioNaoEncontradoException no fluxo de atualização.
+
+PUT {{baseUrl}}/usuarios/999999
+Content-Type: application/json
+
+{
+    "nomeCompleto": "Usuário Fantasma",
+    "email": "fantasma@email.com",
+    "senha": "Senha@2024"
+}
+
+
+# =============================================================================
+# DELETE /usuarios/{id} — EXCLUSÃO
+# =============================================================================
+
+### [DELETE] 13 - Remover usuário existente com sucesso
+# Espera: 204 No Content (sem body na resposta).
+# Após este teste, o ID em @usuarioId não existirá mais no banco.
+
+DELETE {{baseUrl}}/usuarios/{{usuarioId}}
+
+###
+
+### [DELETE] 14 - Tentar remover usuário já excluído ou inexistente
+# Espera: 404 Not Found
+# Execute após o teste 13 para confirmar que o mesmo ID agora retorna 404,
+# ou use diretamente um ID improvável.
+
+DELETE {{baseUrl}}/usuarios/999999
