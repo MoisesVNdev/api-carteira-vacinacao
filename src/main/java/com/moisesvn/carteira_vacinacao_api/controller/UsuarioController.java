@@ -2,6 +2,7 @@ package com.moisesvn.carteira_vacinacao_api.controller;
 
 import com.moisesvn.carteira_vacinacao_api.dto.UsuarioRequestDTO;
 import com.moisesvn.carteira_vacinacao_api.dto.UsuarioResponseDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.UsuarioUpdateRequestDTO;
 import com.moisesvn.carteira_vacinacao_api.service.UsuarioService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +37,7 @@ public class UsuarioController {
     @PutMapping("/{id}")
     public ResponseEntity<UsuarioResponseDTO> atualizar(
             @PathVariable Long id,
-            @Valid @RequestBody UsuarioRequestDTO dto) {
+            @Valid @RequestBody UsuarioUpdateRequestDTO dto) {
         return ResponseEntity.ok(usuarioService.atualizar(id, dto));
     }
 
