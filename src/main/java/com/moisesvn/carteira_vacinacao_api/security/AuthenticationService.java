@@ -47,11 +47,11 @@ public class AuthenticationService {
 
         log.info("Login bem-sucedido para: {}", request.getEmail());
 
-        return LoginResponseDTO.builder()
-                .token(token)
-                .tipo("Bearer")
-                .expiraEm(jwtService.getExpirationTimestamp())
-                .build();
+        return new LoginResponseDTO(
+                token,
+                "Bearer",
+                jwtService.getExpirationTimestamp()
+        );
     }
 
     /**

@@ -1,14 +1,15 @@
 package com.moisesvn.carteira_vacinacao_api.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-
-@Data
-@Builder
-@AllArgsConstructor
-public class LoginResponseDTO {
-    private String token;
-    private String tipo;       // sempre "Bearer"
-    private long expiraEm;     // expiração em ms (epoch)
-}
+/**
+ * DTO de resposta com token JWT e metadados.
+ * Record imutável contendo o token para autenticação subsequente.
+ *
+ * @param token Token JWT para incluir no header Authorization
+ * @param tipo Tipo de token (sempre "Bearer")
+ * @param expiraEm Timestamp de expiração em milissegundos (epoch)
+ */
+public record LoginResponseDTO(
+    String token,
+    String tipo,
+    long expiraEm
+) {}

@@ -1,38 +1,50 @@
 # =============================================================================
 # API - Carteira de Vacinação Digital
-# Entidade: Usuario
-# Controller: UsuarioController.java / AuthController.java
+# Controllers: AuthController.java | UsuarioController.java
 #
-# Como usar:
-#   - Ajuste @baseUrl caso sua API rode em porta ou host diferente.
-#   - Execute as requisições na ordem abaixo:
-#       1. Registrar um novo usuário (público) → o ID será capturado automaticamente.
-#       2. Fazer login (público) → o token JWT será capturado automaticamente.
-#       3. As demais operações (listar, buscar, atualizar, deletar) já utilizarão o token.
-#   - Clique em "Send Request" acima de cada bloco para executá-lo.
+# FLUXO RECOMENDADO DE EXECUÇÃO:
+#   1. Execute o bloco de REGISTRO (seção 1) para criar um usuário.
+#   2. Execute o bloco de LOGIN (seção 2) — ele é NOMEADO (@name loginAPI)
+#      para que o token seja capturado automaticamente na variável @token.
+#   3. Execute qualquer bloco das seções 3-7 que já injetam {{token}} no header.
 #
-# Ambientes alternativos:
-#   Crie um arquivo "http-client.env.json" na raiz do projeto para gerenciar
-#   múltiplos ambientes (dev, homologação, produção). Exemplo:
+# VARIÁVEIS MANUAIS:
+#   - @baseUrl   → ajuste se sua API rodar em porta/host diferente.
+#   - @usuarioId → após registrar ou listar, cole aqui o ID retornado.
+#
+# CAPTURA DINÂMICA DO TOKEN:
+#   A linha "@token = {{loginAPI.response.body.token}}" (logo abaixo do bloco
+#   de login) é um recurso da extensão REST Client chamado "Request Variable".
+#   Ela lê automaticamente o campo "token" do JSON retornado pelo login e
+#   disponibiliza o valor para todos os blocos seguintes que usam {{token}}.
+#   Referência: https://marketplace.visualstudio.com/items?itemName=humao.rest-client#request-variables
+#
+# AMBIENTES ALTERNATIVOS (http-client.env.json):
+#   Crie este arquivo na raiz do projeto para gerenciar múltiplos ambientes:
 #   {
-#     "dev":  { "baseUrl": "http://localhost:8080" },
-#     "hml":  { "baseUrl": "https://hml.api.seudominio.com" }
+#     "dev": { "baseUrl": "http://localhost:8080" },
+#     "hml": { "baseUrl": "https://hml.api.seudominio.com" }
 #   }
-#   Com ele, as variáveis abaixo são sobrescritas automaticamente pelo ambiente
-#   selecionado no canto inferior direito do VS Code.
+#   O ambiente ativo é selecionado no canto inferior direito do VS Code.
+#   As variáveis definidas ali sobrescrevem @baseUrl abaixo.
 # =============================================================================
 
-@baseUrl = http://localhost:8080
+@baseUrl   = http://localhost:8080
+@usuarioId = 1
 
 
 # =============================================================================
-# AUTENTICAÇÃO (PÚBLICA)
+# SEÇÃO 1 — REGISTRO  ·  POST /auth/register  (público)
 # =============================================================================
 
-### [POST] AUTH - Registrar novo usuário com sucesso
-# @name registrarUsuario
+### [AUTH] 1.1 - Registrar usuário com sucesso
 # Espera: 201 Created
-# Retorna o usuário criado (sem a senha). O campo "id" será usado nas próximas requisições.
+# Retorna os dados do usuário criado (sem o campo "senha").
+# IMPORTANTE: Copie o "id" da resposta e atualize @usuarioId no topo do arquivo.
+# A senha deve ter no mínimo 8 caracteres, 1 maiúscula, 1 número e 1 especial,
+# conforme a anotação @Pattern no RegisterRequestDTO.
+# @name registrarUsuario
+
 POST {{baseUrl}}/auth/register
 Content-Type: application/json
 
@@ -44,9 +56,28 @@ Content-Type: application/json
 
 ###
 
-### [POST] AUTH - Registrar novo usuário com e-mail duplicado
+### [AUTH] 1.2 - Registrar usuário com e-mail único via GUID dinâmico
+# Espera: 201 Created
+# {{$guid}} gera um UUID diferente a cada envio — útil para rodar o teste
+# várias vezes sem conflito de e-mail e sem editar o arquivo.
+# @name registrarUsuarioGuid
+
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+    "nomeCompleto": "Usuário Teste",
+    "email": "usuario-{{$guid}}@email.com",
+    "senha": "Senha@2024"
+}
+
+###
+
+### [AUTH] 1.3 - Registrar com e-mail já cadastrado (duplicado)
 # Espera: 409 Conflict
-# Utiliza o mesmo e-mail do teste anterior para forçar a exceção EmailJaCadastradoException.
+# Força a exceção EmailJaCadastradoException no UsuarioService.
+# Para funcionar, execute o teste 1.1 antes deste.
+
 POST {{baseUrl}}/auth/register
 Content-Type: application/json
 
@@ -58,9 +89,26 @@ Content-Type: application/json
 
 ###
 
-### [POST] AUTH - Registrar novo usuário com e-mail inválido
+### [AUTH] 1.4 - Registrar com senha fraca (não atende ao @Pattern)
 # Espera: 400 Bad Request
-# Valida a anotação @Email no RegisterRequestDTO.
+# Testa a validação de força de senha no RegisterRequestDTO.
+# A senha "abc123" não possui maiúscula nem caractere especial.
+
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+    "nomeCompleto": "Pedro Fraco",
+    "email": "pedro.fraco@email.com",
+    "senha": "abc123"
+}
+
+###
+
+### [AUTH] 1.5 - Registrar com e-mail em formato inválido
+# Espera: 400 Bad Request
+# Testa a anotação @Email no RegisterRequestDTO.
+
 POST {{baseUrl}}/auth/register
 Content-Type: application/json
 
@@ -72,20 +120,33 @@ Content-Type: application/json
 
 ###
 
-### [POST] AUTH - Registrar novo usuário com campos obrigatórios ausentes
+### [AUTH] 1.6 - Registrar com body vazio (todos os campos ausentes)
 # Espera: 400 Bad Request
-# Valida as anotações @NotBlank nos três campos obrigatórios.
+# O Bean Validation retorna todos os erros de @NotBlank de uma vez.
+
 POST {{baseUrl}}/auth/register
 Content-Type: application/json
 
 {}
 
-###
 
-### [POST] AUTH - Login com sucesso (credenciais válidas)
+# =============================================================================
+# SEÇÃO 2 — LOGIN  ·  POST /auth/login  (público)
+# =============================================================================
+#
+# ★ ATENÇÃO: O bloco 2.1 é o ponto central de autenticação do arquivo.
+#   - A diretiva "@name loginAPI" nomeia esta requisição.
+#   - Logo após o bloco, a linha "@token = {{loginAPI.response.body.token}}"
+#     captura automaticamente o campo "token" do JSON de resposta e o disponibiliza
+#     como variável para TODOS os blocos subsequentes via {{token}}.
+#   - Certifique-se de EXECUTAR este bloco antes de qualquer requisição protegida.
+#
+# =============================================================================
+
+### [AUTH] 2.1 - Login com sucesso (TOKEN CAPTURADO AUTOMATICAMENTE)
+# Espera: 200 OK com { "token": "eyJ...", "tipo": "Bearer", "expiraEm": ... }
 # @name loginAPI
-# Espera: 200 OK com um token JWT no corpo da resposta (campo "token").
-# O token será automaticamente capturado e utilizado nas requisições protegidas.
+
 POST {{baseUrl}}/auth/login
 Content-Type: application/json
 
@@ -94,65 +155,138 @@ Content-Type: application/json
     "senha": "Senha@2024"
 }
 
+# -----------------------------------------------------------------------------
+# Captura do token JWT retornado pelo login acima.
+# O REST Client lê a propriedade "token" do body da resposta de loginAPI
+# e a armazena em @token para uso nos próximos blocos.
+# Se o campo na resposta mudar de nome (ex: "accessToken"), atualize aqui também.
+# -----------------------------------------------------------------------------
+@token = {{loginAPI.response.body.token}}
+
 ###
 
-### [POST] AUTH - Login com credenciais inválidas
+### [AUTH] 2.2 - Login com senha incorreta
 # Espera: 401 Unauthorized
+# Valida que a mensagem retornada é genérica ("Credenciais inválidas")
+# para evitar enumeração de usuários.
+
 POST {{baseUrl}}/auth/login
 Content-Type: application/json
 
 {
     "email": "joao.silva@email.com",
-    "senha": "senhaErrada"
+    "senha": "senhaErrada!"
 }
 
 ###
 
+### [AUTH] 2.3 - Login com usuário inexistente
+# Espera: 401 Unauthorized
+# Mesma mensagem genérica do teste 2.2 — o backend não deve distinguir
+# "usuário não existe" de "senha incorreta" para o cliente.
+
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+    "email": "nao-existe@email.com",
+    "senha": "Senha@2024"
+}
+
+###
+
+### [AUTH] 2.4 - Login com e-mail em formato inválido
+# Espera: 400 Bad Request
+# A validação @Email no LoginRequestDTO rejeita o payload antes de
+# chegar ao AuthenticationService.
+
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+    "email": "nao-e-um-email",
+    "senha": "Senha@2024"
+}
+
+
 # =============================================================================
-# VARIÁVEIS CAPTURADAS DINAMICAMENTE
+# SEÇÃO 3 — LISTAGEM  ·  GET /usuarios  (protegido)
 # =============================================================================
 
-# Captura o ID do usuário recém-criado (campo "id" da resposta do registro)
-@usuarioId = {{registrarUsuario.response.body.id}}
+### [GET] 3.1 - Listar todos os usuários (autenticado)
+# Espera: 200 OK com um array JSON.
+# Execute o bloco 2.1 antes para garantir que {{token}} está preenchido.
 
-# Captura o token JWT retornado no login (campo "token" da resposta)
-@token = {{loginAPI.response.body.token}}
-
-
-# =============================================================================
-# CRUD DE USUÁRIOS (PROTEGIDO - REQUER TOKEN JWT)
-# =============================================================================
-
-### [GET] Listar todos os usuários (autenticado)
-# Espera: 200 OK com um array JSON (pode ser vazio se nenhum usuário foi criado).
 GET {{baseUrl}}/usuarios
 Authorization: Bearer {{token}}
 
 ###
 
-### [GET] Listar todos os usuários SEM token (não autorizado)
-# Espera: 401 Unauthorized ou 403 Forbidden
+### [GET] 3.2 - Listar usuários SEM token
+# Espera: 401 Unauthorized / 403 Forbidden
+# Em APIs stateless, o Spring Security retorna 403 por padrão para
+# requisições anônimas quando não há um ponto de entrada de autenticação
+# configurado (ex.: formulário de login).
+
 GET {{baseUrl}}/usuarios
 
 ###
 
-### [GET] Buscar usuário por ID existente (autenticado)
+### [GET] 3.3 - Listar usuários com token inválido/adulterado
+# Espera: 401 Unauthorized
+# O JwtAuthenticationFilter detecta a assinatura inválida, não autentica
+# o contexto, e o SecurityConfiguration bloqueia o acesso.
+
+GET {{baseUrl}}/usuarios
+Authorization: Bearer token.invalido.adulterado
+
+
+# =============================================================================
+# SEÇÃO 4 — BUSCA POR ID  ·  GET /usuarios/{id}  (protegido)
+# =============================================================================
+
+### [GET] 4.1 - Buscar usuário por ID existente (autenticado)
 # Espera: 200 OK com os dados do usuário (sem "senha").
+# Atualize @usuarioId no topo com o ID retornado no registro ou na listagem.
+
 GET {{baseUrl}}/usuarios/{{usuarioId}}
 Authorization: Bearer {{token}}
 
 ###
 
-### [GET] Buscar usuário por ID inexistente (autenticado)
+### [GET] 4.2 - Buscar usuário por ID inexistente (autenticado)
 # Espera: 404 Not Found
+# Força a exceção UsuarioNaoEncontradoException.
+
 GET {{baseUrl}}/usuarios/999999
 Authorization: Bearer {{token}}
 
 ###
 
-### [PUT] Atualizar apenas o nome do usuário (autenticado)
+### [GET] 4.3 - Buscar usuário por ID sem token
+# Espera: 401/403 Unauthorized
+# Confirma que o endpoint está protegido mesmo para GET por ID.
+
+GET {{baseUrl}}/usuarios/{{usuarioId}}
+
+
+# =============================================================================
+# SEÇÃO 5 — ATUALIZAÇÃO  ·  PUT /usuarios/{id}  (protegido)
+# =============================================================================
+#
+# NOTA SOBRE O CORPO DA ATUALIZAÇÃO:
+#   Com a introdução do JWT, a atualização foi simplificada para aceitar apenas
+#   o campo "nomeCompleto". E-mail e senha são credenciais de acesso e devem
+#   ser gerenciadas por fluxos dedicados (ex.: PUT /auth/change-password) para
+#   evitar que um token comprometido altere o acesso da conta.
+#   Se o seu UsuarioRequestDTO ainda exige todos os campos, adapte os corpos
+#   dos testes abaixo incluindo "email" e "senha".
+#
+# =============================================================================
+
+### [PUT] 5.1 - Atualizar nome do usuário com sucesso
 # Espera: 200 OK com os dados atualizados (sem "senha").
-# Nota: O DTO de atualização aceita apenas o campo "nomeCompleto" (e-mail e senha não são alterados).
+
 PUT {{baseUrl}}/usuarios/{{usuarioId}}
 Authorization: Bearer {{token}}
 Content-Type: application/json
@@ -163,8 +297,9 @@ Content-Type: application/json
 
 ###
 
-### [PUT] Tentar atualizar usuário com nome vazio (autenticado)
+### [PUT] 5.2 - Tentar atualizar com nome vazio (validação @NotBlank)
 # Espera: 400 Bad Request
+
 PUT {{baseUrl}}/usuarios/{{usuarioId}}
 Authorization: Bearer {{token}}
 Content-Type: application/json
@@ -175,8 +310,10 @@ Content-Type: application/json
 
 ###
 
-### [PUT] Tentar atualizar usuário com ID inexistente (autenticado)
+### [PUT] 5.3 - Tentar atualizar usuário com ID inexistente
 # Espera: 404 Not Found
+# Força a exceção UsuarioNaoEncontradoException no fluxo de atualização.
+
 PUT {{baseUrl}}/usuarios/999999
 Authorization: Bearer {{token}}
 Content-Type: application/json
@@ -187,16 +324,79 @@ Content-Type: application/json
 
 ###
 
-### [DELETE] Remover usuário existente (autenticado)
-# Espera: 204 No Content (sem body na resposta)
+### [PUT] 5.4 - Tentar atualizar sem token
+# Espera: 401/403 Unauthorized
+
+PUT {{baseUrl}}/usuarios/{{usuarioId}}
+Content-Type: application/json
+
+{
+    "nomeCompleto": "Atualização Sem Token"
+}
+
+
+# =============================================================================
+# SEÇÃO 6 — EXCLUSÃO  ·  DELETE /usuarios/{id}  (protegido)
+# =============================================================================
+
+### [DELETE] 6.1 - Remover usuário existente com sucesso
+# Espera: 204 No Content (sem body na resposta).
+# ATENÇÃO: Após este teste, o ID em @usuarioId não existirá mais no banco.
+# Execute o bloco de listagem (3.1) para confirmar a remoção.
+
 DELETE {{baseUrl}}/usuarios/{{usuarioId}}
 Authorization: Bearer {{token}}
 
 ###
 
-### [DELETE] Tentar remover usuário já excluído ou inexistente (autenticado)
+### [DELETE] 6.2 - Tentar remover usuário já excluído ou ID inexistente
 # Espera: 404 Not Found
+# Execute após o teste 6.1 com o mesmo @usuarioId, ou use um ID improvável.
+
 DELETE {{baseUrl}}/usuarios/999999
 Authorization: Bearer {{token}}
 
 ###
+
+### [DELETE] 6.3 - Tentar remover sem token
+# Espera: 401/403 Unauthorized
+
+DELETE {{baseUrl}}/usuarios/{{usuarioId}}
+
+
+# =============================================================================
+# SEÇÃO 7 — CRIAÇÃO DIRETA  ·  POST /usuarios  (público)
+# =============================================================================
+#
+# O endpoint POST /usuarios permanece público (configurado no SecurityConfiguration)
+# como alternativa ao /auth/register.
+# Use /auth/register em produção para garantir a política de senha forte
+# (validação @Pattern no RegisterRequestDTO).
+#
+# =============================================================================
+
+### [POST] 7.1 - Criar usuário via /usuarios (sem token necessário)
+# Espera: 201 Created
+
+POST {{baseUrl}}/usuarios
+Content-Type: application/json
+
+{
+    "nomeCompleto": "Fernanda Lima",
+    "email": "fernanda.lima@email.com",
+    "senha": "Senha@2024"
+}
+
+###
+
+### [POST] 7.2 - Criar usuário com e-mail duplicado via /usuarios
+# Espera: 409 Conflict
+
+POST {{baseUrl}}/usuarios
+Content-Type: application/json
+
+{
+    "nomeCompleto": "Cópia do João",
+    "email": "joao.silva@email.com",
+    "senha": "OutraSenha@99"
+}

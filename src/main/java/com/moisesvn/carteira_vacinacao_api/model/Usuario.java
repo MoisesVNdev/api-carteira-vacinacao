@@ -6,7 +6,8 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "usuario")
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -31,5 +32,25 @@ public class Usuario {
     @PrePersist
     private void prePersist() {
         this.dataCadastro = LocalDateTime.now();
+    }
+
+    /**
+     * Implementa equals baseado apenas no ID (padrão de entidades JPA).
+     * Evita problemas com lazy loading e comparação correta de identidade.
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Usuario)) return false;
+        return id != null && id.equals(((Usuario) o).id);
+    }
+
+    /**
+     * Implementa hashCode baseado apenas no ID (padrão de entidades JPA).
+     * Garante consistência com o contrato de equals().
+     */
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }
