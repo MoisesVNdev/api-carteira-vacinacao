@@ -26,11 +26,25 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.NOT_FOUND, "UsuarioNaoEncontradoException", ex.getMessage(), request);
     }
 
+    @ExceptionHandler(PessoaNaoEncontradaException.class)
+    public ResponseEntity<Map<String, Object>> handlePessoaNaoEncontrada(
+            PessoaNaoEncontradaException ex,
+            HttpServletRequest request) {
+        return buildResponse(HttpStatus.NOT_FOUND, "PessoaNaoEncontradaException", ex.getMessage(), request);
+    }
+
     @ExceptionHandler(EmailJaCadastradoException.class)
     public ResponseEntity<Map<String, Object>> handleEmailDuplicado(
             EmailJaCadastradoException ex,
             HttpServletRequest request) {
         return buildResponse(HttpStatus.CONFLICT, "EmailJaCadastradoException", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(ResponsavelJaCadastradoException.class)
+    public ResponseEntity<Map<String, Object>> handleResponsavelDuplicado(
+            ResponsavelJaCadastradoException ex,
+            HttpServletRequest request) {
+        return buildResponse(HttpStatus.CONFLICT, "ResponsavelJaCadastradoException", ex.getMessage(), request);
     }
 
     @ExceptionHandler(InvalidCredentialsException.class)

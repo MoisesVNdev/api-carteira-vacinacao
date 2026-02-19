@@ -65,6 +65,7 @@ bin/
 # VISUAL STUDIO CODE
 # ----------------------------------------------------------------------------
 .github/
+.copilot-workspace/
 .history/
 .vscode/
 !.vscode/extensions.json

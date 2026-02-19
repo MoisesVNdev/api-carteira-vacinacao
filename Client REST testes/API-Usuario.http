@@ -155,15 +155,13 @@ Content-Type: application/json
     "senha": "Senha@2024"
 }
 
-# -----------------------------------------------------------------------------
+###
+
 # Captura do token JWT retornado pelo login acima.
 # O REST Client lê a propriedade "token" do body da resposta de loginAPI
 # e a armazena em @token para uso nos próximos blocos.
 # Se o campo na resposta mudar de nome (ex: "accessToken"), atualize aqui também.
-# -----------------------------------------------------------------------------
 @token = {{loginAPI.response.body.token}}
-
-###
 
 ### [AUTH] 2.2 - Login com senha incorreta
 # Espera: 401 Unauthorized
