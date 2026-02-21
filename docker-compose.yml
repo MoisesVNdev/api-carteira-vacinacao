@@ -44,10 +44,11 @@ services:
     # -----------------------------------------------------------------------
     # VOLUMES - Persistência de Dados
     # -----------------------------------------------------------------------
-    volumes:
-      # Volume nomeado para dados do PostgreSQL
-      # Os dados persistem mesmo após 'docker-compose down'
-      - postgres_data:/var/lib/postgresql/data
+    # Use tmpfs para tornar o diretório de dados efêmero.
+    # Isso garante que o banco será inicializado/zerado toda vez
+    # que o container for recriado (útil para testes).
+    tmpfs:
+      - /var/lib/postgresql/data
     
     # -----------------------------------------------------------------------
     # PORTAS
@@ -151,6 +152,10 @@ services:
       
       # Porta da aplicação
       SERVER_PORT: 8080
+      
+      # Configuração de JWT (segurança)
+      JWT_SECRET: ${JWT_SECRET:-MIIEpAIBAAKCAQEA4f5wg5l2hKsTeNem/V41fGnJm6gOdrj8ym3rFkEU/wT8RDtn}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
     
     # -----------------------------------------------------------------------
     # VOLUMES

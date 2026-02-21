@@ -1,0 +1,99 @@
+@baseUrl   = http://localhost:8080
+@usuarioId = 1
+
+# =============================================================================
+# SEÇÃO 1 — REGISTRO  ·  POST /auth/register  (público)
+# =============================================================================
+
+### [AUTH] Registrar usuário para usar Pessoa API
+# Espera: 201 Created
+# @name registrarUsuario
+
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+    "nomeCompleto": "João Silva",
+    "email": "joao.silva@email.com",
+    "senha": "Senha@2024"
+}
+
+###
+
+# =============================================================================
+# SEÇÃO 2 — LOGIN  ·  POST /auth/login  (público)
+# =============================================================================
+
+### [AUTH] Login para obter token
+# Espera: 200 OK com token JWT
+# @name loginAPI
+
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+    "email": "joao.silva@email.com",
+    "senha": "Senha@2024"
+}
+
+###
+
+@token = {{loginAPI.response.body.token}}
+
+# =============================================================================
+# SEÇÃO 3 — API PESSOA  ·  Endpoints protegidos
+# Controller: PessoaController.java
+# =============================================================================
+
+### [POST] 3.1 - Criar pessoa
+# Espera: 201 Created
+# Execute o login (2.1) antes para garantir que {{token}} está preenchido.
+
+POST {{baseUrl}}/api/pessoas
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "nomeCompleto": "Ana Souza",
+  "cpf": "12345678901",
+  "dataNascimento": "1990-05-20"
+}
+
+###
+
+### [GET] 3.2 - Listar todas as pessoas
+# Espera: 200 OK com array de pessoas
+
+GET {{baseUrl}}/api/pessoas
+Authorization: Bearer {{token}}
+
+###
+
+### [GET] 3.3 - Buscar pessoa por ID
+# Espera: 200 OK ou 404 Not Found
+
+GET {{baseUrl}}/api/pessoas/1
+Authorization: Bearer {{token}}
+
+###
+
+### [PUT] 3.4 - Atualizar pessoa
+# Espera: 200 OK ou 404 Not Found
+
+PUT {{baseUrl}}/api/pessoas/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "nomeCompleto": "Ana Souza Silva",
+  "cpf": "12345678901",
+  "dataNascimento": "1990-05-20"
+}
+
+###
+
+### [DELETE] 3.5 - Deletar pessoa
+# Espera: 204 No Content ou 404 Not Found
+
+DELETE {{baseUrl}}/api/pessoas/1
+Authorization: Bearer {{token}}

@@ -1,0 +1,268 @@
+# =============================================================================
+# FLUXO DE USO VÁLIDO — Carteira de Vacinação Digital
+# 
+# Este arquivo contém um teste de fluxo completo e válido da API:
+#   1. Registro de usuário
+#   2. Login e captura de token
+#   3. Criação de pessoa
+#   4. Operações com pessoa (listar, buscar, atualizar)
+#   5. Criação de responsável
+#   6. Operações com responsável (listar, buscar)
+#   7. Operações extras com usuário (listar, buscar, atualizar)
+#   8. Limpeza (exclusão de registros)
+#
+# VARIÁVEIS:
+#   - @baseUrl    → URL da API (padrão: http://localhost:8080)
+#   - @usuarioId  → ID do usuário criado (preenchido automaticamente)
+#   - @pessoaId   → ID da pessoa criada (preenchido automaticamente)
+#   - @token      → JWT capturado após login (preenchido automaticamente)
+#
+# FLUXO DE EXECUÇÃO:
+#   Execute os blocos na ordem abaixo para validar o sistema completo.
+# =============================================================================
+
+@baseUrl = http://localhost:8080
+
+
+# =============================================================================
+# 1. REGISTRO — Criar novo usuário com e-mail único
+# =============================================================================
+
+### [1] Registrar novo usuário
+# Espera: 201 Created
+# {{$guid}} gera um UUID diferente a cada execução.
+# @name registrarNovoUsuario
+
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+    "nomeCompleto": "Usuário de Teste Fluxo",
+    "email": "usuario-fluxo-{{$guid}}@email.com",
+    "senha": "Senha@2026"
+}
+
+###
+
+# Captura o ID do usuário criado para uso posterior
+@usuarioId = {{registrarNovoUsuario.response.body.id}}
+# Captura o email do usuário registrado para usar no login
+@emailUsuario = {{registrarNovoUsuario.response.body.email}}
+# Gera um CPF único com 11 dígitos (12345 + 6 dígitos aleatórios)
+@cpf = 12345{{$randomInt(6)}}
+# Gera um CNS único com 18 dígitos (obrigatório e único no BD)
+@cns = 123456789012345{{$randomInt(3)}}
+
+
+# =============================================================================
+# 2. LOGIN — Autenticar e capturar token JWT
+# =============================================================================
+
+### [2] Login com credenciais válidas
+# Espera: 200 OK
+# Usa o email capturado no registro para garantir correspondência.
+# Captura o token JWT para usar nos endpoints protegidos.
+# @name loginFluxo
+
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+    "email": "{{emailUsuario}}",
+    "senha": "Senha@2026"
+}
+
+###
+
+# Captura automática do token JWT
+@token = {{loginFluxo.response.body.token}}
+
+
+# =============================================================================
+# 3. PESSOA — Criar e gerenciar dados da pessoa
+# =============================================================================
+
+### [3.1] Criar pessoa vinculada ao usuário
+# Espera: 201 Created
+# @name criarPessoa
+
+POST {{baseUrl}}/api/pessoas
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "nomeCompleto": "João da Silva Santos",
+    "dataNascimento": "1990-05-20",
+    "cns": "{{cns}}",
+    "cpf": "{{cpf}}",
+    "nomeMae": "Maria da Silva"
+}
+
+###
+
+# Captura o ID da pessoa criada
+@pessoaId = {{criarPessoa.response.body.id}}
+
+### [3.2] Listar todas as pessoas
+# Espera: 200 OK com array de pessoas
+
+GET {{baseUrl}}/api/pessoas
+Authorization: Bearer {{token}}
+
+###
+
+### [3.3] Buscar pessoa específica por ID
+# Espera: 200 OK com dados da pessoa
+
+GET {{baseUrl}}/api/pessoas/{{pessoaId}}
+Authorization: Bearer {{token}}
+
+###
+
+### [3.4] Atualizar dados da pessoa
+# Espera: 200 OK com dados atualizados
+
+PUT {{baseUrl}}/api/pessoas/{{pessoaId}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "nomeCompleto": "João da Silva Santos Atualizado",
+    "dataNascimento": "1990-05-20",
+    "cns": "{{cns}}",
+    "cpf": "{{cpf}}",
+    "nomeMae": "Maria da Silva"
+}
+
+###
+
+
+# =============================================================================
+# 4. RESPONSÁVEL — Criar e gerenciar responsáveis
+# =============================================================================
+
+### [4.1] Criar responsável (vinculando usuário e pessoa)
+# Espera: 201 Created
+# @name criarResponsavel
+
+POST {{baseUrl}}/api/responsaveis
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "usuarioId": {{usuarioId}},
+    "pessoaId": {{pessoaId}},
+    "parentesco": "Pai"
+}
+
+###
+
+# Captura o ID do responsável criado (se disponível na resposta)
+@responsavelId = {{criarResponsavel.response.body.id}}
+
+### [4.2] Listar responsáveis do usuário logado
+# Espera: 200 OK com array de responsáveis
+
+GET {{baseUrl}}/api/responsaveis/usuario/{{usuarioId}}
+Authorization: Bearer {{token}}
+
+###
+
+### [4.3] Buscar responsável específico por ID
+# Espera: 200 OK com dados do responsável
+
+GET {{baseUrl}}/api/responsaveis/{{responsavelId}}
+Authorization: Bearer {{token}}
+
+###
+
+
+# =============================================================================
+# 5. USUÁRIO — Gerenciar dados do usuário autenticado
+# =============================================================================
+
+### [5.1] Listar todos os usuários (protegido)
+# Espera: 200 OK com array de usuários
+
+GET {{baseUrl}}/usuarios
+Authorization: Bearer {{token}}
+
+###
+
+### [5.2] Buscar usuário específico por ID
+# Espera: 200 OK com dados do usuário (sem campo "senha")
+
+GET {{baseUrl}}/usuarios/{{usuarioId}}
+Authorization: Bearer {{token}}
+
+###
+
+### [5.3] Atualizar nome completo do usuário
+# Espera: 200 OK com dados atualizados
+
+PUT {{baseUrl}}/usuarios/{{usuarioId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "nomeCompleto": "Usuário de Teste Fluxo - Atualizado"
+}
+
+###
+
+
+# =============================================================================
+# 6. LIMPEZA (OPCIONAL) — Remover registros criados
+# =============================================================================
+# 
+# ATENÇÃO: Descomente os blocos abaixo apenas se quiser deletar os registros.
+# A ordem importa: responsável antes da pessoa, pessoa antes do usuário.
+#
+# =============================================================================
+
+### [6.1] Deletar responsável criado
+# Espera: 204 No Content
+# ATENÇÃO: Esta operação é irreversível.
+
+DELETE {{baseUrl}}/api/responsaveis/{{responsavelId}}
+Authorization: Bearer {{token}}
+
+###
+
+### [6.2] Deletar pessoa criada
+# Espera: 204 No Content
+# ATENÇÃO: Esta operação é irreversível.
+
+DELETE {{baseUrl}}/api/pessoas/{{pessoaId}}
+Authorization: Bearer {{token}}
+
+###
+
+### [6.3] Deletar usuário criado
+# Espera: 204 No Content
+# ATENÇÃO: Esta operação é irreversível e encerra a sessão.
+
+DELETE {{baseUrl}}/usuarios/{{usuarioId}}
+Authorization: Bearer {{token}}
+
+###
+
+
+# =============================================================================
+# RESUMO DO FLUXO EXECUTADO
+# =============================================================================
+#
+# ✓ [1]   Criar usuário com email único (GUID)
+# ✓ [2]   Fazer login e capturar token JWT
+# ✓ [3]   Criar, listar, buscar e atualizar pessoa
+# ✓ [4]   Criar, listar e buscar responsável
+# ✓ [5]   Listar, buscar e atualizar usuário
+# ✓ [6]   Deletar registros (opcional)
+#
+# VARIÁVEIS DINÂMICAS CAPTURADAS:
+#   - {{usuarioId}}      → ID do usuário registrado
+#   - {{pessoaId}}       → ID da pessoa criada
+#   - {{responsavelId}}  → ID do responsável criado
+#   - {{token}}          → JWT capturado após login
+#
+# =============================================================================

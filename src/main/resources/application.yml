@@ -88,6 +88,14 @@ spring:
           use_query_cache: false
   
   # --------------------------------------------------------------------------
+  # WEB (Configuração de recursos estáticos e padrões)
+  # --------------------------------------------------------------------------
+  web:
+    resources:
+      # Padrões de recursos estáticos (excluindo /actuator)
+      static-locations: classpath:/static/,classpath:/public/
+  
+  # --------------------------------------------------------------------------
   # DEVTOOLS (Hot Reload)
   # --------------------------------------------------------------------------
   # Descomente para habilitar o DevTools em desenvolvimento
@@ -98,6 +106,17 @@ spring:
   #     exclude: static/**,public/**
   #   livereload:
   #     enabled: true
+
+# ============================================================================
+# CONFIGURAÇÕES DE JWT
+# ============================================================================
+jwt:
+  # Chave secreta para assinar o token JWT (base64)
+  # IMPORTANTE: Em produção, use uma variável de ambiente segura
+  secret: ${JWT_SECRET:MIIEpAIBAAKCAQEA4f5wg5l2hKsTeNem/V41fGnJm6gOdrj8ym3rFkEU/wT8RDtn}
+  
+  # Tempo de expiração do token em milissegundos (padrão: 24 horas = 86400000)
+  expiration: ${JWT_EXPIRATION:86400000}
 
 # ============================================================================
 # CONFIGURAÇÕES DO SERVIDOR
@@ -155,25 +174,22 @@ management:
       
       # Base path dos endpoints
       base-path: /actuator
+      
+      # Caminho base da web (importante para roteamento)
+      base-path-mapping: /
   
   endpoint:
     health:
-      # Exibe detalhes do health check
-      show-details: when-authorized
+      # Mostra detalhes do health check públicamente
+      show-details: always
       
       # Habilita health checks para dependências
       probes:
         enabled: true
   
-  health:
-    # Health check do banco de dados
-    db:
-      enabled: true
-    
-    # Health check de disco
-    diskspace:
-      enabled: true
-      threshold: 10MB
+  # Endpoints customizados
+  server:
+    add-application-context-header: false
 
 # ============================================================================
 # OBSERVAÇÕES
