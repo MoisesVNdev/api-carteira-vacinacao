@@ -14,8 +14,15 @@
 # ============================================================================
 # ESTÁGIO 1: BUILD
 # ============================================================================
-# Usa uma imagem Maven com JDK para compilar a aplicação
-FROM maven:3.9-eclipse-temurin-21-alpine AS build
+# Usa Amazon Corretto (distribuição OpenJDK mantida pela AWS)
+# Geralmente possui menos vulnerabilidades que outras distribuições
+FROM amazoncorretto:21-alpine AS build
+
+# -----------------------------------------------------------------------
+# SEGURANÇA: Instala Maven e atualiza pacotes do sistema
+# -----------------------------------------------------------------------
+RUN apk update && apk upgrade --no-cache && \
+    apk add --no-cache maven
 
 # Define o diretório de trabalho
 WORKDIR /app
@@ -47,8 +54,9 @@ RUN mvn clean package -DskipTests -B
 # ============================================================================
 # ESTÁGIO 2: RUNTIME
 # ============================================================================
-# Usa uma imagem JRE mínima para executar a aplicação
-FROM eclipse-temurin:21-jre-alpine
+# Usa Amazon Corretto Alpine (distribuição OpenJDK mantida pela AWS)
+# Imagem otimizada e com melhor suporte de segurança
+FROM amazoncorretto:21-alpine
 
 # -----------------------------------------------------------------------
 # METADADOS
@@ -56,6 +64,11 @@ FROM eclipse-temurin:21-jre-alpine
 LABEL maintainer="seu-email@exemplo.com"
 LABEL description="Spring Boot Application"
 LABEL version="1.0.0"
+
+# -----------------------------------------------------------------------
+# SEGURANÇA: Atualiza pacotes do sistema para corrigir vulnerabilidades
+# -----------------------------------------------------------------------
+RUN apk update && apk upgrade --no-cache
 
 # -----------------------------------------------------------------------
 # INSTALAÇÃO DE FERRAMENTAS ESSENCIAIS
