@@ -67,25 +67,25 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         
         # Formata o SQL para melhor legibilidade
-        format_sql: true
+        "[format_sql]": true
         
         # Usa nomes de colunas físicos
-        physical_naming_strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+        "[physical_naming_strategy]": org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
         
         # Configurações de performance
         jdbc:
           # Tamanho do lote para operações em massa
-          batch_size: 20
+          "[batch_size]": 20
           
           # Ordena inserts para melhor performance
-          order_inserts: true
-          order_updates: true
-          batch_versioned_data: true
+          "[order_inserts]": true
+          "[order_updates]": true
+          "[batch_versioned_data]": true
         
         # Cache de segundo nível (desabilitado por padrão)
         cache:
-          use_second_level_cache: false
-          use_query_cache: false
+          "[use_second_level_cache]": false
+          "[use_query_cache]": false
   
   # --------------------------------------------------------------------------
   # WEB (Configuração de recursos estáticos e padrões)
@@ -94,6 +94,11 @@ spring:
     resources:
       # Padrões de recursos estáticos (excluindo /actuator)
       static-locations: classpath:/static/,classpath:/public/
+    error:
+      # Não incluir stack trace nas respostas
+      include-stacktrace: never
+      # Não incluir mensagem de exceção
+      include-message: never
   
   # --------------------------------------------------------------------------
   # DEVTOOLS (Hot Reload)
@@ -131,12 +136,6 @@ server:
     mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
     min-response-size: 1024
   
-  # Configurações de erro
-  error:
-    # Não incluir stack trace nas respostas
-    include-stacktrace: never
-    # Não incluir mensagem de exceção
-    include-message: never
 
 # ============================================================================
 # CONFIGURAÇÕES DE LOGGING
@@ -147,15 +146,15 @@ logging:
     root: INFO
     
     # Logs do Spring Framework
-    org.springframework.web: INFO
-    org.springframework.security: INFO
+    "[org.springframework.web]": INFO
+    "[org.springframework.security]": DEBUG
     
     # Logs do Hibernate
-    org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    "[org.hibernate.SQL]": DEBUG
+    "[org.hibernate.type.descriptor.sql.BasicBinder]": TRACE
     
     # Logs da sua aplicação
-    com.example: DEBUG
+    "[com.moisesvn.carteira_vacinacao_api]": DEBUG
   
   # Padrão de log
   pattern:
@@ -174,9 +173,6 @@ management:
       
       # Base path dos endpoints
       base-path: /actuator
-      
-      # Caminho base da web (importante para roteamento)
-      base-path-mapping: /
   
   endpoint:
     health:

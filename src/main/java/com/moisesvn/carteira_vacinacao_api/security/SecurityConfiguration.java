@@ -1,6 +1,7 @@
 package com.moisesvn.carteira_vacinacao_api.security;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -16,41 +17,55 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/**
+ * Configuração de segurança Spring Security com JWT.
+ * 
+ * Fluxo:
+ * 1. JwtAuthenticationFilter intercepta requisição e extrai token JWT
+ * 2. Valida token e popula SecurityContext com autenticação
+ * 3. Requisição é autorizada/negada baseado nas regras em authorizeHttpRequests()
+ */
+@Slf4j
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity   // habilita @PreAuthorize para granularidade futura por role
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfiguration {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final JwtAuthenticationEntryPoint authenticationEntryPoint;
     private final UserDetailsServiceImpl userDetailsService;
-    private final PasswordEncoder passwordEncoder;   // bean definido em AppConfig
+    private final PasswordEncoder passwordEncoder;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        log.info("🔐 Configurando SecurityFilterChain");
+        
         http
-            // APIs stateless não precisam de CSRF
+            // Desabilita CSRF para APIs stateless
             .csrf(csrf -> csrf.disable())
-
-            // Gerenciamento de sessão: sem estado (cada request é independente)
-            .sessionManagement(session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            
+            // Define regras de autorização por endpoint
+            .authorizeHttpRequests(authz -> authz
+                // Endpoints públicos
+                .requestMatchers("/health", "/actuator/**").permitAll()
+                .requestMatchers("/auth/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/usuarios").permitAll()
+                
+                // Qualquer outra requisição requer autenticação
+                .anyRequest().authenticated()
             )
-
-            // Regras de autorização por endpoint
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/health", "/actuator/**").permitAll()    // health check e actuator endpoints públicos
-                .requestMatchers("/auth/**").permitAll()            // login e registro públicos
-                .requestMatchers(HttpMethod.POST, "/usuarios").permitAll() // criação sem token
-                .anyRequest().authenticated()                        // todo o restante exige JWT
-            )
-
-            // Provedor de autenticação customizado
+            // Retorna 401 com mensagem clara quando não autenticado
+            .exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint))
+            
+            // Configura provedor de autenticação ANTES de adicionar o filtro
             .authenticationProvider(authenticationProvider())
-
-            // Nosso filtro JWT entra antes do filtro padrão de usuário/senha
+            
+            // Adiciona filtro JWT ANTES do filtro padrão
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
+        log.info("✅ SecurityFilterChain configurado com sucesso");
         return http.build();
     }
 

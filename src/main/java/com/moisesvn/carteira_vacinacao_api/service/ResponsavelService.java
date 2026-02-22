@@ -2,8 +2,10 @@ package com.moisesvn.carteira_vacinacao_api.service;
 
 import com.moisesvn.carteira_vacinacao_api.dto.ResponsavelRequestDTO;
 import com.moisesvn.carteira_vacinacao_api.dto.ResponsavelResponseDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.ResponsavelUpdateRequestDTO;
 import com.moisesvn.carteira_vacinacao_api.exception.PessoaNaoEncontradaException;
 import com.moisesvn.carteira_vacinacao_api.exception.ResponsavelJaCadastradoException;
+import com.moisesvn.carteira_vacinacao_api.exception.ResponsavelNaoEncontradoException;
 import com.moisesvn.carteira_vacinacao_api.exception.UsuarioNaoEncontradoException;
 import com.moisesvn.carteira_vacinacao_api.mapper.ResponsavelMapper;
 import com.moisesvn.carteira_vacinacao_api.model.Pessoa;
@@ -13,12 +15,14 @@ import com.moisesvn.carteira_vacinacao_api.repository.PessoaRepository;
 import com.moisesvn.carteira_vacinacao_api.repository.ResponsavelRepository;
 import com.moisesvn.carteira_vacinacao_api.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ResponsavelService {
@@ -27,8 +31,14 @@ public class ResponsavelService {
     private final UsuarioRepository usuarioRepository;
     private final PessoaRepository pessoaRepository;
 
+    /**
+     * Cria um vínculo de responsável manualmente.
+     * 
+     * NOTA: Este método é mantido para uso interno, mas o endpoint público POST
+     * foi removido. A criação normal de responsáveis é automática via PessoaService.
+     */
     @Transactional
-    public ResponsavelResponseDTO create(ResponsavelRequestDTO dto) {
+    ResponsavelResponseDTO create(ResponsavelRequestDTO dto) {
         Long usuarioId = dto.usuarioId();
         Long pessoaId = dto.pessoaId();
 
@@ -50,6 +60,29 @@ public class ResponsavelService {
 
         Responsavel salvo = responsavelRepository.save(r);
         return ResponsavelMapper.toResponseDto(salvo);
+    }
+
+    /**
+     * Atualiza o tipo de relação de um vínculo existente.
+     * 
+     * @param id ID do responsável
+     * @param dto Dados de atualização (contém apenas tipoRelacao)
+     * @return DTO com os dados atualizados
+     * @throws ResponsavelNaoEncontradoException se o responsável não for encontrado
+     */
+    @Transactional
+    public ResponsavelResponseDTO update(Long id, ResponsavelUpdateRequestDTO dto) {
+        log.info("Atualizando tipo de relação do responsável ID: {}", id);
+        
+        Responsavel responsavel = responsavelRepository.findById(id)
+                .orElseThrow(() -> new ResponsavelNaoEncontradoException(id));
+        
+        responsavel.setTipoRelacao(dto.tipoRelacao());
+        Responsavel atualizado = responsavelRepository.save(responsavel);
+        
+        log.info("Tipo de relação atualizado com sucesso. ID: {}, Novo tipo: {}", id, dto.tipoRelacao());
+        
+        return ResponsavelMapper.toResponseDto(atualizado);
     }
 
     @Transactional(readOnly = true)

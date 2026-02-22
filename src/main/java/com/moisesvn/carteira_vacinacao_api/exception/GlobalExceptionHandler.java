@@ -2,6 +2,7 @@ package com.moisesvn.carteira_vacinacao_api.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -33,6 +34,13 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.NOT_FOUND, "PessoaNaoEncontradaException", ex.getMessage(), request);
     }
 
+    @ExceptionHandler(ResponsavelNaoEncontradoException.class)
+    public ResponseEntity<Map<String, Object>> handleResponsavelNaoEncontrado(
+            ResponsavelNaoEncontradoException ex,
+            HttpServletRequest request) {
+        return buildResponse(HttpStatus.NOT_FOUND, "ResponsavelNaoEncontradoException", ex.getMessage(), request);
+    }
+
     @ExceptionHandler(EmailJaCadastradoException.class)
     public ResponseEntity<Map<String, Object>> handleEmailDuplicado(
             EmailJaCadastradoException ex,
@@ -40,11 +48,54 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.CONFLICT, "EmailJaCadastradoException", ex.getMessage(), request);
     }
 
+    @ExceptionHandler(CnsJaCadastradoException.class)
+    public ResponseEntity<Map<String, Object>> handleCnsDuplicado(
+            CnsJaCadastradoException ex,
+            HttpServletRequest request) {
+        return buildResponse(HttpStatus.CONFLICT, "CnsJaCadastradoException", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(CpfJaCadastradoException.class)
+    public ResponseEntity<Map<String, Object>> handleCpfDuplicado(
+            CpfJaCadastradoException ex,
+            HttpServletRequest request) {
+        return buildResponse(HttpStatus.CONFLICT, "CpfJaCadastradoException", ex.getMessage(), request);
+    }
+
     @ExceptionHandler(ResponsavelJaCadastradoException.class)
     public ResponseEntity<Map<String, Object>> handleResponsavelDuplicado(
             ResponsavelJaCadastradoException ex,
             HttpServletRequest request) {
         return buildResponse(HttpStatus.CONFLICT, "ResponsavelJaCadastradoException", ex.getMessage(), request);
+    }
+
+    /**
+     * Trata violações de integridade do banco de dados (constraints).
+     * Identifica constraints de CNS/CPF únicos para fornecer mensagens mais amigáveis.
+     */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, Object>> handleDataIntegrityViolation(
+            DataIntegrityViolationException ex,
+            HttpServletRequest request) {
+        String mensagem = "Erro de integridade de dados";
+        
+        String exMessage = ex.getMessage() != null ? ex.getMessage().toLowerCase() : "";
+        
+        // Detectar constraint unique de CNS
+        if (exMessage.contains("cns") || exMessage.contains("uk_pessoa_cns")) {
+            mensagem = "CNS já cadastrado no sistema";
+        } 
+        // Detectar constraint unique de CPF
+        else if (exMessage.contains("cpf") || exMessage.contains("uk_pessoa_cpf")) {
+            mensagem = "CPF já cadastrado no sistema";
+        }
+        // Detectar constraint unique de Email
+        else if (exMessage.contains("email") || exMessage.contains("uk_usuario_email")) {
+            mensagem = "E-mail já cadastrado no sistema";
+        }
+        
+        log.warn("Violação de integridade de dados: {}", ex.getMessage());
+        return buildResponse(HttpStatus.CONFLICT, "DataIntegrityViolationException", mensagem, request);
     }
 
     @ExceptionHandler(InvalidCredentialsException.class)

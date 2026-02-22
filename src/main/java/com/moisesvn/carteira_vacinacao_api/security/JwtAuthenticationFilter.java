@@ -48,9 +48,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
 
         String authHeader = request.getHeader(AUTH_HEADER);
+        
+        log.debug("Request para: {} {}", request.getMethod(), request.getRequestURI());
+        log.debug("Authorization header presente: {}", authHeader != null);
 
         // Se não há header ou não começa com "Bearer ", passa adiante sem autenticar
         if (authHeader == null || !authHeader.startsWith(BEARER_PREFIX)) {
+            log.debug("Sem token JWT - passando adiante");
             filterChain.doFilter(request, response);
             return;
         }
@@ -59,10 +63,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             String email = jwtService.extractUsername(token);
+            log.info("Email extraído do token: {}", email);
 
             // Autentica apenas se o contexto ainda estiver vazio (evita reprocessamento)
             if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+                log.debug("UserDetails carregado para: {}", email);
 
                 if (jwtService.isTokenValid(token, userDetails)) {
                     UsernamePasswordAuthenticationToken authToken =
@@ -74,13 +80,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
 
-                    log.debug("Usuário autenticado via JWT: {}", email);
+                    log.info("✅ Usuário autenticado via JWT: {} - Authorities: {}", email, userDetails.getAuthorities());
+                } else {
+                    log.warn("❌ Token inválido ou expirado para: {}", email);
                 }
+            } else if (SecurityContextHolder.getContext().getAuthentication() != null) {
+                log.debug("Usuário já autenticado no contexto");
             }
         } catch (Exception ex) {
-            // Apenas log de debug para falhas, não warn
-            // Requisições sem token é normal e não deve gerar warnings
-            log.debug("Token inválido ou expirado: {}", ex.getMessage());
+            log.error("❌ Erro ao processar token JWT: {} - {}", ex.getClass().getSimpleName(), ex.getMessage(), ex);
         }
 
         filterChain.doFilter(request, response);
