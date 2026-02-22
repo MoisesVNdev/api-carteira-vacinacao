@@ -69,6 +69,34 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.CONFLICT, "ResponsavelJaCadastradoException", ex.getMessage(), request);
     }
 
+    @ExceptionHandler(AlergiaNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleAlergiaNaoEncontrada(
+            AlergiaNotFoundException ex,
+            HttpServletRequest request) {
+        return buildResponse(HttpStatus.NOT_FOUND, "AlergiaNotFoundException", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(AlergiaJaCadastradaException.class)
+    public ResponseEntity<Map<String, Object>> handleAlergiaJaCadastrada(
+            AlergiaJaCadastradaException ex,
+            HttpServletRequest request) {
+        return buildResponse(HttpStatus.CONFLICT, "AlergiaJaCadastradaException", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(PessoaAlergiaNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handlePessoaAlergiaNaoEncontrada(
+            PessoaAlergiaNotFoundException ex,
+            HttpServletRequest request) {
+        return buildResponse(HttpStatus.NOT_FOUND, "PessoaAlergiaNotFoundException", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(PessoaAlergiaJaCadastradoException.class)
+    public ResponseEntity<Map<String, Object>> handlePessoaAlergiaJaCadastrada(
+            PessoaAlergiaJaCadastradoException ex,
+            HttpServletRequest request) {
+        return buildResponse(HttpStatus.CONFLICT, "PessoaAlergiaJaCadastradoException", ex.getMessage(), request);
+    }
+
     /**
      * Trata violações de integridade do banco de dados (constraints).
      * Identifica constraints de CNS/CPF únicos para fornecer mensagens mais amigáveis.

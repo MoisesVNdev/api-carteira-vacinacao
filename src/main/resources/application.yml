@@ -54,8 +54,9 @@ spring:
     # Estratégia de gerenciamento do schema
     # update: Atualiza o schema (recomendado para desenvolvimento)
     # validate: Valida o schema sem alterações (recomendado para produção)
+    # none: Desabilita DDL (quando Flyway gerencia o schema)
     hibernate:
-      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:update}
+      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:none}
     
     # Exibir SQL no console
     show-sql: ${SPRING_JPA_SHOW_SQL:false}
@@ -86,6 +87,22 @@ spring:
         cache:
           "[use_second_level_cache]": false
           "[use_query_cache]": false
+  
+  # --------------------------------------------------------------------------
+  # FLYWAY - DATABASE MIGRATIONS
+  # --------------------------------------------------------------------------
+  flyway:
+    # Habilita execução automática das migrations
+    enabled: true
+    
+    # Localização das migrations SQL
+    locations: classpath:db/migration
+    
+    # Baseline da migração (início das migrations)
+    baseline-on-migrate: true
+    
+    # Validar integridade das migrations
+    validate-on-migrate: true
   
   # --------------------------------------------------------------------------
   # WEB (Configuração de recursos estáticos e padrões)
