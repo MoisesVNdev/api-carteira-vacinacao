@@ -10,6 +10,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
@@ -97,6 +98,48 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.CONFLICT, "PessoaAlergiaJaCadastradoException", ex.getMessage(), request);
     }
 
+    @ExceptionHandler(VacinaNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleVacinaNaoEncontrada(
+            VacinaNotFoundException ex,
+            HttpServletRequest request) {
+        return buildResponse(HttpStatus.NOT_FOUND, "VacinaNotFoundException", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(EsquemaVacinalNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleEsquemaVacinalNaoEncontrado(
+            EsquemaVacinalNotFoundException ex,
+            HttpServletRequest request) {
+        return buildResponse(HttpStatus.NOT_FOUND, "EsquemaVacinalNotFoundException", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(RegistroVacinaNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleRegistroVacinaNaoEncontrado(
+            RegistroVacinaNotFoundException ex,
+            HttpServletRequest request) {
+        return buildResponse(HttpStatus.NOT_FOUND, "RegistroVacinaNotFoundException", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(RegistroVacinaDuplicadoException.class)
+    public ResponseEntity<Map<String, Object>> handleRegistroVacinaDuplicado(
+            RegistroVacinaDuplicadoException ex,
+            HttpServletRequest request) {
+        return buildResponse(HttpStatus.CONFLICT, "RegistroVacinaDuplicadoException", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(DoseAnteriorNaoAplicadaException.class)
+    public ResponseEntity<Map<String, Object>> handleDoseAnteriorNaoAplicada(
+            DoseAnteriorNaoAplicadaException ex,
+            HttpServletRequest request) {
+        return buildResponse(HttpStatus.valueOf(422), "DoseAnteriorNaoAplicadaException", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(PessoaNaoPertenceAoUsuarioException.class)
+    public ResponseEntity<Map<String, Object>> handlePessoaNaoPertenceAoUsuario(
+            PessoaNaoPertenceAoUsuarioException ex,
+            HttpServletRequest request) {
+        return buildResponse(HttpStatus.FORBIDDEN, "PessoaNaoPertenceAoUsuarioException", ex.getMessage(), request);
+    }
+
     /**
      * Trata violações de integridade do banco de dados (constraints).
      * Identifica constraints de CNS/CPF únicos para fornecer mensagens mais amigáveis.
@@ -169,6 +212,17 @@ public class GlobalExceptionHandler {
                 .map(e -> e.getField() + ": " + e.getDefaultMessage())
                 .collect(Collectors.joining("; "));
         return buildResponse(HttpStatus.BAD_REQUEST, "MethodArgumentNotValidException", mensagem, request);
+    }
+
+    /**
+     * Retorna 404 quando a URL nao corresponde a nenhum endpoint registrado.
+     */
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleNoResourceFound(
+            NoResourceFoundException ex,
+            HttpServletRequest request) {
+        log.warn("Recurso nao encontrado: {}", request.getRequestURI());
+        return buildResponse(HttpStatus.NOT_FOUND, "NoResourceFoundException", "Recurso nao encontrado", request);
     }
 
     @ExceptionHandler(Exception.class)

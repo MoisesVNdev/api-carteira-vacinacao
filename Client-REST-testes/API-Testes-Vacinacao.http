@@ -1,0 +1,447 @@
+### ======================================
+### 💉 CARTEIRA DE VACINAÇÃO API - TESTES DE VACINAÇÃO
+### ======================================
+### 📝 INSTRUÇÕES DE USO:
+### 1. Inicie Docker: docker compose up
+### 2. Execute PRIMEIRO os passos 1-5 do arquivo API-TestesValidos.http
+###    (para ter usuário, token e pessoa cadastrados)
+### 3. Abra este arquivo no VS Code com extensão REST Client
+### 4. Execute as requisições em ordem (clique em "Send Request")
+### 5. Este arquivo contém testes do módulo de VACINAÇÃO
+### 6. O token de login é capturado AUTOMATICAMENTE!
+### ======================================
+
+### Variáveis Globais (ATUALIZE CONFORME NECESSIDADE)
+@baseUrl = http://localhost:8080
+@token = {{login.response.body.token}}
+@pessoaId = 1
+@vacinaId = 1
+@esquemaVacinalId = 1
+@registroVacinaId = 1
+
+###############################################################################
+### REGISTRAR NOVO USUÁRIO
+###############################################################################
+### 📌 O quê: Criar novo usuário no sistema
+### ✅ Resposta esperada: 201 Created
+### 📋 Próximo passo: Copiar "id" para @usuarioId
+### ⚠️ Email deve ser ÚNICO em cada teste (mudar o sufixo numérico)
+### 🔓 Não requer autenticação
+### 📝 Requisitos de Senha:
+###    ├─ Mínimo 8 caracteres
+###    ├─ 1 letra maiúscula
+###    ├─ 1 número
+###    └─ 1 caractere especial
+###############################################################################
+# @name register
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "nomeCompleto": "João Silva Teste",
+  "email": "joao.teste@example.com",
+  "senha": "Senha@123"
+}
+
+###############################################################################
+### 🔑 LOGIN (OBTER TOKEN JWT)
+###############################################################################
+### 📌 O quê: Autenticar usuário e obter token de acesso
+### ✅ Resposta esperada: 200 OK com token JWT
+### 🔓 Não requer autenticação (login é público)
+### 💡 IMPORTANTE: Use email e senha de usuário já cadastrado
+###############################################################################
+# @name login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "joao.teste@example.com",
+  "senha": "Senha@123"
+}
+
+###############################################################################
+### 1️⃣ LISTAR TODAS AS VACINAS DO CATÁLOGO PNI
+###############################################################################
+### 📌 O quê: Obter lista completa de todas as vacinas do PNI
+### ✅ Resposta esperada: 200 OK com array de vacinas
+### 🔐 Requer autenticação: Bearer {{token}}
+### 💡 Catálogo do Programa Nacional de Imunizações (PNI)
+### 📋 Próximo passo: Copiar "id" de uma vacina para @vacinaId
+###############################################################################
+GET {{baseUrl}}/api/v1/vacinas
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+###############################################################################
+### 2️⃣ BUSCAR VACINA ESPECÍFICA POR ID
+###############################################################################
+### 📌 O quê: Obter detalhes completos de uma vacina específica
+### ✅ Resposta esperada: 200 OK
+### 🔐 Requer autenticação: Bearer {{token}}
+### 📋 Dependência: Executar Passo 1 primeiro (ter @vacinaId válido)
+### 💡 Exemplo: vacinaId = 1 (BCG), 2 (Hepatite B), 3 (Pentavalente)
+###############################################################################
+GET {{baseUrl}}/api/v1/vacinas/{{vacinaId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+###############################################################################
+### 3️⃣ LISTAR ESQUEMAS VACINAIS (DOSES) DE UMA VACINA
+###############################################################################
+### 📌 O quê: Obter todas as doses previstas de uma vacina específica
+### ✅ Resposta esperada: 200 OK com array de esquemas vacinais
+### 🔐 Requer autenticação: Bearer {{token}}
+### 📋 Dependência: Executar Passo 1 primeiro (ter @vacinaId válido)
+### 💡 Mostra: descricaoDose, idadeRecomendadaMeses, intervaloMinimoDias
+### 📋 Próximo passo: Copiar "id" de um esquema para @esquemaVacinalId
+###############################################################################
+GET {{baseUrl}}/api/v1/vacinas/{{vacinaId}}/esquema
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+###############################################################################
+### 4️⃣ GERAR CALENDÁRIO VACINAL PERSONALIZADO
+###############################################################################
+### 📌 O quê: Obter calendário completo com status de cada dose
+### ✅ Resposta esperada: 200 OK com array de itens do calendário
+### 🔐 Requer autenticação: Bearer {{token}}
+### 📋 Dependência: Ter @pessoaId válido (pessoa cadastrada)
+### 💡 ENDPOINT PRINCIPAL: Cruza catálogo PNI com registros da pessoa
+### 📊 Status possíveis:
+###    ├─ APLICADA: dose já registrada
+###    ├─ PENDENTE: dose não aplicada, dentro do prazo (dataPrevista >= hoje)
+###    └─ ATRASADA: dose não aplicada, fora do prazo (dataPrevista < hoje)
+### 🧮 Cálculo automático:
+###    dataPrevista = dataNascimento + idadeRecomendadaMeses
+###############################################################################
+GET {{baseUrl}}/api/v1/pessoas/{{pessoaId}}/calendario
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+###############################################################################
+### 5️⃣ REGISTRAR APLICAÇÃO DE DOSE DE VACINA
+###############################################################################
+### 📌 O quê: Registrar que uma dose foi aplicada na pessoa
+### ✅ Resposta esperada: 201 Created
+### 🔐 Requer autenticação: Bearer {{token}}
+### 📋 Dependências:
+###    ├─ Ter @pessoaId válido (pessoa vinculada ao usuário)
+###    ├─ Ter @esquemaVacinalId válido (obtido no Passo 3)
+###    └─ Pessoa DEVE pertencer ao usuário autenticado
+### 🔐 Validações automáticas:
+###    ├─ ✅ Pessoa pertence ao usuário (via tabela responsavel)
+###    ├─ ✅ Dose não está duplicada
+###    └─ ✅ Dose anterior da mesma vacina já foi aplicada (hierarquia)
+### 📝 Campo "lote" é OBRIGATÓRIO
+### 📝 Campos opcionais: fabricante, vacinador, localAplicacao
+### 📋 Próximo passo: Copiar "id" da resposta para @registroVacinaId
+###############################################################################
+POST {{baseUrl}}/api/v1/registros
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "pessoaId": {{pessoaId}},
+  "esquemaVacinalId": {{esquemaVacinalId}},
+  "dataAplicacao": "2024-06-01",
+  "lote": "LOT-2024-BCG-001",
+  "fabricante": "Fundação Ataulpho de Paiva",
+  "vacinador": "Enfermeira Maria Silva",
+  "localAplicacao": "UBS Centro - São Paulo/SP"
+}
+
+###############################################################################
+### 6️⃣ LISTAR HISTÓRICO DE VACINAÇÃO (APENAS DOSES APLICADAS)
+###############################################################################
+### 📌 O quê: Obter comprovante de vacinação com todas as doses aplicadas
+### ✅ Resposta esperada: 200 OK com array de registros
+### 🔐 Requer autenticação: Bearer {{token}}
+### 📋 Dependência: Executar Passo 5 primeiro (ter registros de vacina)
+### 💡 Diferença do Passo 4:
+###    ├─ Passo 4 (calendário): mostra TODAS as doses (aplicadas, pendentes, atrasadas)
+###    └─ Passo 6 (histórico): mostra APENAS doses com status APLICADA
+### 📄 Use para gerar comprovantes/cartão de vacinação
+###############################################################################
+GET {{baseUrl}}/api/v1/pessoas/{{pessoaId}}/historico
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+###############################################################################
+### 7️⃣ REGISTRAR 2ª DOSE (TESTE DE HIERARQUIA)
+###############################################################################
+### 📌 O quê: Registrar 2ª dose de uma vacina (validação de hierarquia)
+### ✅ Resposta esperada: 201 Created OU 422 Unprocessable Entity
+### 🔐 Requer autenticação: Bearer {{token}}
+### 📋 Dependência: Ter registrado a 1ª dose antes (Passo 5)
+### ⚠️ VALIDAÇÃO AUTOMÁTICA DE HIERARQUIA:
+###    ├─ Se 1ª dose NÃO aplicada → 422 "Dose anterior não aplicada"
+###    └─ Se 1ª dose aplicada → 201 Created
+### 💡 Exemplo: Pentavalente tem 3 doses (1ª, 2ª, 3ª)
+###    Não é possível registrar 2ª sem ter 1ª aplicada
+### 📝 Ajustar @esquemaVacinalId para a 2ª dose da mesma vacina
+###############################################################################
+POST {{baseUrl}}/api/v1/registros
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "pessoaId": {{pessoaId}},
+  "esquemaVacinalId": 6,
+  "dataAplicacao": "2024-08-01",
+  "lote": "LOT-2024-PENTA-002",
+  "fabricante": "Fiocruz",
+  "vacinador": "Dr. João Santos",
+  "localAplicacao": "UBS Vila Nova - São Paulo/SP"
+}
+
+###############################################################################
+### 8️⃣ TESTE DE ERRO: REGISTRAR DOSE DUPLICADA
+###############################################################################
+### 📌 O quê: Tentar registrar a mesma dose duas vezes
+### ❌ Resposta esperada: 409 Conflict
+### 🔐 Requer autenticação: Bearer {{token}}
+### 📋 Dependência: Ter registrado uma dose antes (Passo 5)
+### 💡 Validação: constraint UNIQUE (pessoa_id, esquema_vacinal_id)
+### 📝 Use mesmo @esquemaVacinalId do Passo 5
+###############################################################################
+POST {{baseUrl}}/api/v1/registros
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "pessoaId": {{pessoaId}},
+  "esquemaVacinalId": {{esquemaVacinalId}},
+  "dataAplicacao": "2024-06-02",
+  "lote": "LOT-2024-BCG-002",
+  "fabricante": "Fundação Ataulpho de Paiva",
+  "vacinador": "Enfermeira Ana Costa",
+  "localAplicacao": "UBS Sul - São Paulo/SP"
+}
+
+###############################################################################
+### 9️⃣ TESTE DE ERRO: REGISTRAR 3ª DOSE SEM 2ª APLICADA
+###############################################################################
+### 📌 O quê: Tentar pular uma dose (hierarquia violada)
+### ❌ Resposta esperada: 422 Unprocessable Entity
+### 🔐 Requer autenticação: Bearer {{token}}
+### 💡 Validação de hierarquia:
+###    "Não é possível registrar a dose '3ª Dose' da vacina 'Pentavalente'
+###     sem que a dose '2ª Dose' esteja aplicada"
+### 📝 Exemplo: Pentavalente tem 3 doses (IDs: 5, 6, 7)
+###    Tentar registrar 3ª dose (ID 7) sem ter 2ª dose (ID 6) aplicada
+###############################################################################
+POST {{baseUrl}}/api/v1/registros
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "pessoaId": {{pessoaId}},
+  "esquemaVacinalId": 7,
+  "dataAplicacao": "2024-10-01",
+  "lote": "LOT-2024-PENTA-003",
+  "fabricante": "Fiocruz",
+  "vacinador": "Enfermeira Paula Lima",
+  "localAplicacao": "UBS Leste - São Paulo/SP"
+}
+
+###############################################################################
+### 🔟 TESTE DE ERRO: REGISTRAR VACINA DE PESSOA NÃO VINCULADA
+###############################################################################
+### 📌 O quê: Tentar registrar vacina de pessoa que não pertence ao usuário
+### ❌ Resposta esperada: 403 Forbidden
+### 🔐 Requer autenticação: Bearer {{token}}
+### 💡 Validação de posse:
+###    Sistema verifica na tabela `responsavel` se existe vínculo
+###    entre usuario_id (do token JWT) e pessoa_id
+### 📝 Use um @pessoaId que NÃO pertence ao usuário autenticado
+### ⚠️ Se você só tem 1 usuário, este teste não funcionará
+###############################################################################
+POST {{baseUrl}}/api/v1/registros
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "pessoaId": 999,
+  "esquemaVacinalId": {{esquemaVacinalId}},
+  "dataAplicacao": "2024-06-01",
+  "lote": "LOT-2024-BCG-001",
+  "fabricante": "Fundação Ataulpho de Paiva",
+  "vacinador": "Enfermeira Maria Silva",
+  "localAplicacao": "UBS Centro - São Paulo/SP"
+}
+
+###############################################################################
+### 1️⃣1️⃣ DELETAR REGISTRO DE VACINA (CORREÇÃO DE ERRO)
+###############################################################################
+### 📌 O quê: Remover um registro de vacinação incorreto
+### ✅ Resposta esperada: 204 No Content
+### 🔐 Requer autenticação: Bearer {{token}}
+### 📋 Dependência: Ter um @registroVacinaId válido (obtido no Passo 5)
+### ⚠️ AVISO: Esta ação é IRREVERSÍVEL
+### 💡 Use caso:
+###    ├─ Registro com lote errado
+###    ├─ Data de aplicação incorreta
+###    └─ Registro duplicado por engano
+### 🔐 Validação: Registro deve pertencer a pessoa vinculada ao usuário
+###############################################################################
+DELETE {{baseUrl}}/api/v1/registros/{{registroVacinaId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+###############################################################################
+### 1️⃣2️⃣ VERIFICAR CALENDÁRIO APÓS REGISTRO (VALIDAÇÃO)
+###############################################################################
+### 📌 O quê: Verificar que o status da dose mudou para APLICADA
+### ✅ Resposta esperada: 200 OK
+### 🔐 Requer autenticação: Bearer {{token}}
+### 📋 Dependência: Executar Passo 5 primeiro (ter registros)
+### 💡 Verificar que:
+###    ├─ Doses registradas aparecem com status: "APLICADA"
+###    ├─ Campo "registro" está preenchido (não null)
+###    ├─ dataPrevista é calculada corretamente
+###    ├─ Doses não aplicadas com dataPrevista < hoje: "ATRASADA"
+###    └─ Doses não aplicadas com dataPrevista >= hoje: "PENDENTE"
+###############################################################################
+GET {{baseUrl}}/api/v1/pessoas/{{pessoaId}}/calendario
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+###############################################################################
+### 1️⃣3️⃣ TESTE: REGISTRAR VACINA COM DATA FUTURA (VALIDAÇÃO)
+###############################################################################
+### 📌 O quê: Tentar registrar vacina com data de aplicação futura
+### ❌ Resposta esperada: 400 Bad Request
+### 🔐 Requer autenticação: Bearer {{token}}
+### 💡 Validação Bean Validation:
+###    @PastOrPresent: "Data de aplicação não pode ser futura"
+### 📝 Use uma data no futuro (ex: 2026-12-31)
+###############################################################################
+POST {{baseUrl}}/api/v1/registros
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "pessoaId": {{pessoaId}},
+  "esquemaVacinalId": 2,
+  "dataAplicacao": "2026-12-31",
+  "lote": "LOT-FUTURO-001",
+  "fabricante": "Fiocruz",
+  "vacinador": "Enfermeira Futura",
+  "localAplicacao": "UBS do Futuro"
+}
+
+###############################################################################
+### 1️⃣4️⃣ TESTE: REGISTRAR VACINA SEM LOTE (VALIDAÇÃO)
+###############################################################################
+### 📌 O quê: Tentar registrar vacina sem informar o lote
+### ❌ Resposta esperada: 400 Bad Request
+### 🔐 Requer autenticação: Bearer {{token}}
+### 💡 Validação Bean Validation:
+###    @NotBlank: "Lote da vacina é obrigatório"
+### 📝 Campo "lote" não pode ser null, vazio ou apenas espaços
+###############################################################################
+POST {{baseUrl}}/api/v1/registros
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "pessoaId": {{pessoaId}},
+  "esquemaVacinalId": 2,
+  "dataAplicacao": "2024-06-01",
+  "fabricante": "Fiocruz",
+  "vacinador": "Enfermeira Maria Silva",
+  "localAplicacao": "UBS Centro"
+}
+
+###############################################################################
+### 1️⃣5️⃣ EXEMPLO COMPLETO: FLUXO DE VACINAÇÃO PENTAVALENTE
+###############################################################################
+### 📌 O quê: Registrar as 3 doses da Pentavalente respeitando hierarquia
+### ✅ Resposta esperada: 201 Created (para cada dose)
+### 🔐 Requer autenticação: Bearer {{token}}
+### 💡 Pentavalente (vacinaId = 3):
+###    ├─ 1ª Dose: aos 2 meses (esquemaVacinalId = 5)
+###    ├─ 2ª Dose: aos 4 meses (esquemaVacinalId = 6)
+###    └─ 3ª Dose: aos 6 meses (esquemaVacinalId = 7)
+### 📝 Execute em ordem: 1ª → 2ª → 3ª
+###############################################################################
+
+### 1ª Dose Pentavalente
+POST {{baseUrl}}/api/v1/registros
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "pessoaId": {{pessoaId}},
+  "esquemaVacinalId": 5,
+  "dataAplicacao": "2024-03-15",
+  "lote": "PENTA-1A-2024-001",
+  "fabricante": "Fiocruz",
+  "vacinador": "Enfermeira Ana Costa",
+  "localAplicacao": "UBS Centro"
+}
+
+###
+
+### 2ª Dose Pentavalente
+POST {{baseUrl}}/api/v1/registros
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "pessoaId": {{pessoaId}},
+  "esquemaVacinalId": 6,
+  "dataAplicacao": "2024-05-15",
+  "lote": "PENTA-2A-2024-002",
+  "fabricante": "Fiocruz",
+  "vacinador": "Enfermeira Paula Lima",
+  "localAplicacao": "UBS Centro"
+}
+
+###
+
+### 3ª Dose Pentavalente
+POST {{baseUrl}}/api/v1/registros
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "pessoaId": {{pessoaId}},
+  "esquemaVacinalId": 7,
+  "dataAplicacao": "2024-07-15",
+  "lote": "PENTA-3A-2024-003",
+  "fabricante": "Fiocruz",
+  "vacinador": "Dr. João Santos",
+  "localAplicacao": "UBS Centro"
+}
+
+###############################################################################
+### 📊 RESUMO DOS ENDPOINTS DE VACINAÇÃO
+###############################################################################
+###
+### 📖 CONSULTA (GET):
+###    ├─ GET /api/v1/vacinas                       → Lista todas as vacinas
+###    ├─ GET /api/v1/vacinas/{id}                  → Busca vacina por ID
+###    ├─ GET /api/v1/vacinas/{id}/esquema          → Lista doses da vacina
+###    ├─ GET /api/v1/pessoas/{id}/calendario       → Calendário personalizado ⭐
+###    └─ GET /api/v1/pessoas/{id}/historico        → Histórico (doses aplicadas)
+###
+### ✏️ CRIAÇÃO (POST):
+###    └─ POST /api/v1/registros                    → Registra aplicação de dose
+###
+### 🗑️ EXCLUSÃO (DELETE):
+###    └─ DELETE /api/v1/registros/{id}             → Remove registro (correção)
+###
+### 🔒 VALIDAÇÕES AUTOMÁTICAS:
+###    ├─ 403 Forbidden       → Pessoa não pertence ao usuário
+###    ├─ 404 Not Found       → Esquema vacinal/pessoa não encontrado
+###    ├─ 409 Conflict        → Dose já registrada
+###    ├─ 422 Unprocessable   → Dose anterior não aplicada (hierarquia)
+###    └─ 400 Bad Request     → Validação Bean Validation (campos obrigatórios)
+###
+### 💡 CÁLCULOS AUTOMÁTICOS:
+###    ├─ dataPrevista = dataNascimento + idadeRecomendadaMeses
+###    └─ status = APLICADA | PENDENTE | ATRASADA (dinâmico)
+###
+###############################################################################
