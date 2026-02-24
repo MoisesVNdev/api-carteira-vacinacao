@@ -52,6 +52,15 @@ public class SecurityConfiguration {
                 .requestMatchers("/health", "/actuator/**").permitAll()
                 .requestMatchers("/auth/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/usuarios").permitAll()
+                // Swagger UI e documentação OpenAPI
+                .requestMatchers(
+                    "/api-docs/**",
+                    "/api-docs.yaml",
+                    "/v3/api-docs/**",
+                    "/v3/api-docs.yaml",
+                    "/swagger-ui.html",
+                    "/swagger-ui/**"
+                ).permitAll()
                 
                 // Qualquer outra requisição requer autenticação
                 .anyRequest().authenticated()

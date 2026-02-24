@@ -132,6 +132,18 @@ spring:
 # ============================================================================
 # CONFIGURAÇÕES DE JWT
 # ============================================================================
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: alpha
+    tagsSorter: alpha
+    display-request-duration: true
+    groups-order: asc
+  show-actuator: false
+  default-produces-media-type: application/json
+
 jwt:
   # Chave secreta para assinar o token JWT (base64)
   # IMPORTANTE: Em produção, use uma variável de ambiente segura

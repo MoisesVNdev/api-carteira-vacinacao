@@ -1,10 +1,10 @@
 package com.moisesvn.carteira_vacinacao_api.controller;
 
 import com.moisesvn.carteira_vacinacao_api.dto.AlergiaResponseDTO;
+import com.moisesvn.carteira_vacinacao_api.openapi.AlergiaApi;
 import com.moisesvn.carteira_vacinacao_api.service.AlergiaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -21,38 +21,21 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/alergias")
 @RequiredArgsConstructor
-public class AlergiaController {
+public class AlergiaController implements AlergiaApi {
 
     private final AlergiaService alergiaService;
 
-    /**
-     * Lista todas as alergias cadastradas no catálogo.
-     *
-     * @return Lista completa de alergias
-     */
-    @GetMapping
+    @Override
     public ResponseEntity<List<AlergiaResponseDTO>> listarTodas() {
         return ResponseEntity.ok(alergiaService.findAll());
     }
 
-    /**
-     * Busca uma alergia específica pelo ID.
-     *
-     * @param id ID da alergia
-     * @return Dados da alergia encontrada
-     */
-    @GetMapping("/{id}")
+    @Override
     public ResponseEntity<AlergiaResponseDTO> buscarPorId(@PathVariable Long id) {
         return ResponseEntity.ok(alergiaService.findById(id));
     }
 
-    /**
-     * Busca múltiplas alergias pelos IDs informados via query param.
-     *
-     * @param ids Identificadores das alergias, separados por vírgula
-     * @return Lista de alergias correspondentes aos IDs fornecidos
-     */
-    @GetMapping("/lote")
+    @Override
     public ResponseEntity<List<AlergiaResponseDTO>> buscarPorIds(
             @RequestParam("ids") List<Long> ids) {
         return ResponseEntity.ok(alergiaService.findByIds(ids));

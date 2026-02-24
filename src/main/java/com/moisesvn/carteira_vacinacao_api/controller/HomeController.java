@@ -1,13 +1,13 @@
 package com.moisesvn.carteira_vacinacao_api.controller;
 
+import com.moisesvn.carteira_vacinacao_api.openapi.HomeApi;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class HomeController {
+public class HomeController implements HomeApi {
 
-    @GetMapping("/")
+    @Override
     public ResponseEntity<?> home() {
         return ResponseEntity.ok(new ApiInfoResponse(
             "API Carteira de Vacinação Digital",
@@ -16,7 +16,7 @@ public class HomeController {
         ));
     }
 
-    @GetMapping("/health")
+    @Override
     public ResponseEntity<?> health() {
         return ResponseEntity.ok(new HealthResponse("UP", "API está funcionando corretamente"));
     }

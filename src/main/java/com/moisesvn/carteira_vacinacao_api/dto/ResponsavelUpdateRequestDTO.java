@@ -1,5 +1,6 @@
 package com.moisesvn.carteira_vacinacao_api.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 
 /**
@@ -8,6 +9,7 @@ import jakarta.validation.constraints.NotBlank;
  */
 public record ResponsavelUpdateRequestDTO(
     @NotBlank(message = "Tipo de relação é obrigatório")
+    @Schema(description = "Tipo de relacao com a pessoa.", example = "MAE", requiredMode = Schema.RequiredMode.REQUIRED)
     String tipoRelacao
 ) {
 }

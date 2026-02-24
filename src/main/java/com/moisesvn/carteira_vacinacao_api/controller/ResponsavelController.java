@@ -2,11 +2,15 @@ package com.moisesvn.carteira_vacinacao_api.controller;
 
 import com.moisesvn.carteira_vacinacao_api.dto.ResponsavelResponseDTO;
 import com.moisesvn.carteira_vacinacao_api.dto.ResponsavelUpdateRequestDTO;
+import com.moisesvn.carteira_vacinacao_api.openapi.ResponsavelApi;
 import com.moisesvn.carteira_vacinacao_api.service.ResponsavelService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -19,42 +23,23 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/responsaveis")
 @RequiredArgsConstructor
-public class ResponsavelController {
+public class ResponsavelController implements ResponsavelApi {
 
     private final ResponsavelService responsavelService;
 
-    /**
-     * Lista todos os responsáveis vinculados a um usuário específico.
-     * 
-     * @param usuarioId ID do usuário
-     * @return Lista de vínculos de responsável
-     */
-    @GetMapping("/usuario/{usuarioId}")
+    @Override
     public ResponseEntity<List<ResponsavelResponseDTO>> listByUsuario(@PathVariable Long usuarioId) {
         List<ResponsavelResponseDTO> lista = responsavelService.findByUsuarioId(usuarioId);
         return ResponseEntity.ok(lista);
     }
 
-    /**
-     * Busca um vínculo de responsável por ID.
-     * 
-     * @param id ID do responsável
-     * @return Dados do vínculo
-     */
-    @GetMapping("/{id}")
+    @Override
     public ResponseEntity<ResponsavelResponseDTO> getById(@PathVariable Long id) {
         ResponsavelResponseDTO dto = responsavelService.findById(id);
         return dto == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(dto);
     }
 
-    /**
-     * Atualiza o tipo de relação de um vínculo existente.
-     * 
-     * @param id ID do responsável
-     * @param dto Dados de atualização (tipoRelacao)
-     * @return Dados atualizados do vínculo
-     */
-    @PutMapping("/{id}")
+    @Override
     public ResponseEntity<ResponsavelResponseDTO> update(
             @PathVariable Long id,
             @RequestBody @Valid ResponsavelUpdateRequestDTO dto) {
@@ -62,13 +47,7 @@ public class ResponsavelController {
         return ResponseEntity.ok(atualizado);
     }
 
-    /**
-     * Remove um vínculo de responsável (desvincula usuário de pessoa).
-     * 
-     * @param id ID do responsável
-     * @return 204 No Content
-     */
-    @DeleteMapping("/{id}")
+    @Override
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         responsavelService.deleteById(id);
         return ResponseEntity.noContent().build();
