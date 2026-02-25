@@ -1,6 +1,6 @@
 package com.moisesvn.carteira_vacinacao_api.service;
 
-import com.moisesvn.carteira_vacinacao_api.dto.AlergiaResponseDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.response.AlergiaResponseDTO;
 import com.moisesvn.carteira_vacinacao_api.exception.AlergiaNotFoundException;
 import com.moisesvn.carteira_vacinacao_api.mapper.AlergiaMapper;
 import com.moisesvn.carteira_vacinacao_api.repository.AlergiaRepository;

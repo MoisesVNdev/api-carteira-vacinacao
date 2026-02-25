@@ -1,5 +1,7 @@
 package com.moisesvn.carteira_vacinacao_api.openapi;
 
+import com.moisesvn.carteira_vacinacao_api.dto.response.ApiInfoResponseDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.response.HealthResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -31,7 +33,7 @@ public interface HomeApi {
                 """)))
     })
     @GetMapping("/")
-    ResponseEntity<?> home();
+    ResponseEntity<ApiInfoResponseDTO> home();
 
     @Operation(
         summary = "Health check",
@@ -47,5 +49,5 @@ public interface HomeApi {
                 """)))
     })
     @GetMapping("/health")
-    ResponseEntity<?> health();
+    ResponseEntity<HealthResponseDTO> health();
 }

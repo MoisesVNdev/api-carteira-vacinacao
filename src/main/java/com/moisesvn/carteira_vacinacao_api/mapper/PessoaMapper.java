@@ -1,7 +1,7 @@
 package com.moisesvn.carteira_vacinacao_api.mapper;
 
-import com.moisesvn.carteira_vacinacao_api.dto.PessoaRequestDTO;
-import com.moisesvn.carteira_vacinacao_api.dto.PessoaResponseDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.request.PessoaRequestDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.response.PessoaResponseDTO;
 import com.moisesvn.carteira_vacinacao_api.model.Pessoa;
 
 /**

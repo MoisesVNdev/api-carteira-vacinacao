@@ -1,11 +1,14 @@
 package com.moisesvn.carteira_vacinacao_api.openapi;
 
-import com.moisesvn.carteira_vacinacao_api.dto.EsquemaVacinalResponseDTO;
-import com.moisesvn.carteira_vacinacao_api.dto.VacinaResponseDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.ErrorResponseDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.response.EsquemaVacinalResponseDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.response.VacinaResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -31,9 +34,16 @@ public interface VacinaApi {
     )
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso.",
-            content = @Content(schema = @Schema(implementation = VacinaResponseDTO.class))),
+            content = @Content(array = @ArraySchema(schema = @Schema(implementation = VacinaResponseDTO.class)))),
         @ApiResponse(responseCode = "401", description = "Token ausente ou inválido.",
-            content = @Content(schema = @Schema(hidden = true)))
+            content = @Content(
+                schema = @Schema(implementation = ErrorResponseDTO.class),
+                examples = {
+                    @ExampleObject(
+                        value = "{\"timestamp\":\"2026-02-24T10:30:00Z\",\"status\":401,\"erro\":\"InvalidTokenException\",\"mensagem\":\"Token inválido ou expirado\",\"caminho\":\"/api/vacinas\"}"
+                    )
+                }
+            ))
     })
     @GetMapping
     ResponseEntity<List<VacinaResponseDTO>> listarTodas();
@@ -46,9 +56,23 @@ public interface VacinaApi {
         @ApiResponse(responseCode = "200", description = "Vacina encontrada.",
             content = @Content(schema = @Schema(implementation = VacinaResponseDTO.class))),
         @ApiResponse(responseCode = "401", description = "Token ausente ou inválido.",
-            content = @Content(schema = @Schema(hidden = true))),
+            content = @Content(
+                schema = @Schema(implementation = ErrorResponseDTO.class),
+                examples = {
+                    @ExampleObject(
+                        value = "{\"timestamp\":\"2026-02-24T10:30:00Z\",\"status\":401,\"erro\":\"InvalidTokenException\",\"mensagem\":\"Token inválido ou expirado\",\"caminho\":\"/api/vacinas/999\"}"
+                    )
+                }
+            )),
         @ApiResponse(responseCode = "404", description = "Vacina não encontrada.",
-            content = @Content(schema = @Schema(hidden = true)))
+            content = @Content(
+                schema = @Schema(implementation = ErrorResponseDTO.class),
+                examples = {
+                    @ExampleObject(
+                        value = "{\"timestamp\":\"2026-02-24T10:30:00Z\",\"status\":404,\"erro\":\"VacinaNotFoundException\",\"mensagem\":\"Vacina com ID 999 não encontrada\",\"caminho\":\"/api/vacinas/999\"}"
+                    )
+                }
+            ))
     })
     @GetMapping("/{id}")
     ResponseEntity<VacinaResponseDTO> buscarPorId(
@@ -62,11 +86,25 @@ public interface VacinaApi {
     )
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Lista de esquemas retornada com sucesso.",
-            content = @Content(schema = @Schema(implementation = EsquemaVacinalResponseDTO.class))),
+            content = @Content(array = @ArraySchema(schema = @Schema(implementation = EsquemaVacinalResponseDTO.class)))),
         @ApiResponse(responseCode = "401", description = "Token ausente ou inválido.",
-            content = @Content(schema = @Schema(hidden = true))),
+            content = @Content(
+                schema = @Schema(implementation = ErrorResponseDTO.class),
+                examples = {
+                    @ExampleObject(
+                        value = "{\"timestamp\":\"2026-02-24T10:30:00Z\",\"status\":401,\"erro\":\"InvalidTokenException\",\"mensagem\":\"Token inválido ou expirado\",\"caminho\":\"/api/vacinas/999/esquema\"}"
+                    )
+                }
+            )),
         @ApiResponse(responseCode = "404", description = "Vacina não encontrada.",
-            content = @Content(schema = @Schema(hidden = true)))
+            content = @Content(
+                schema = @Schema(implementation = ErrorResponseDTO.class),
+                examples = {
+                    @ExampleObject(
+                        value = "{\"timestamp\":\"2026-02-24T10:30:00Z\",\"status\":404,\"erro\":\"VacinaNotFoundException\",\"mensagem\":\"Vacina com ID 999 não encontrada\",\"caminho\":\"/api/vacinas/999/esquema\"}"
+                    )
+                }
+            ))
     })
     @GetMapping("/{id}/esquema")
     ResponseEntity<List<EsquemaVacinalResponseDTO>> listarEsquemasVacinais(

@@ -1,10 +1,13 @@
 package com.moisesvn.carteira_vacinacao_api.openapi;
 
-import com.moisesvn.carteira_vacinacao_api.dto.ResponsavelResponseDTO;
-import com.moisesvn.carteira_vacinacao_api.dto.ResponsavelUpdateRequestDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.ErrorResponseDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.response.ResponsavelResponseDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.request.ResponsavelUpdateRequestDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -31,9 +34,20 @@ public interface ResponsavelApi {
     )
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso.",
-            content = @Content(schema = @Schema(implementation = ResponsavelResponseDTO.class))),
+            content = @Content(array = @ArraySchema(schema = @Schema(implementation = ResponsavelResponseDTO.class)))),
         @ApiResponse(responseCode = "401", description = "Token ausente ou inválido.",
-            content = @Content(schema = @Schema(hidden = true)))
+            content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class),
+                examples = {
+                    @ExampleObject(value = """
+                    {
+                      "timestamp": "2026-02-24T10:30:00",
+                      "status": 401,
+                      "erro": "TokenInvalidoException",
+                      "mensagem": "Token JWT inválido ou expirado",
+                      "caminho": "/api/responsaveis/usuario/1"
+                    }
+                    """)
+                }))
     })
     @GetMapping("/usuario/{usuarioId}")
     ResponseEntity<List<ResponsavelResponseDTO>> listByUsuario(
@@ -49,9 +63,31 @@ public interface ResponsavelApi {
         @ApiResponse(responseCode = "200", description = "Responsável encontrado.",
             content = @Content(schema = @Schema(implementation = ResponsavelResponseDTO.class))),
         @ApiResponse(responseCode = "401", description = "Token ausente ou inválido.",
-            content = @Content(schema = @Schema(hidden = true))),
+            content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class),
+                examples = {
+                    @ExampleObject(value = """
+                    {
+                      "timestamp": "2026-02-24T10:30:00",
+                      "status": 401,
+                      "erro": "TokenInvalidoException",
+                      "mensagem": "Token JWT inválido ou expirado",
+                      "caminho": "/api/responsaveis/1"
+                    }
+                    """)
+                })),
         @ApiResponse(responseCode = "404", description = "Responsável não encontrado.",
-            content = @Content(schema = @Schema(hidden = true)))
+            content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class),
+                examples = {
+                    @ExampleObject(value = """
+                    {
+                      "timestamp": "2026-02-24T10:30:00",
+                      "status": 404,
+                      "erro": "ResponsavelNaoEncontradoException",
+                      "mensagem": "Responsável com ID 1 não encontrado",
+                      "caminho": "/api/responsaveis/1"
+                    }
+                    """)
+                }))
     })
     @GetMapping("/{id}")
     ResponseEntity<ResponsavelResponseDTO> getById(
@@ -61,19 +97,52 @@ public interface ResponsavelApi {
 
     @Operation(
         summary = "Atualizar tipo de relação",
-        description = "Atualiza o tipo de relação (ex: PAI, MÃE, TUTOR) de um vínculo existente."
+        description = "Atualiza parcialmente o tipo de relação (ex: PAI, MÃE, TUTOR) de um vínculo existente."
     )
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Vínculo atualizado com sucesso.",
             content = @Content(schema = @Schema(implementation = ResponsavelResponseDTO.class))),
         @ApiResponse(responseCode = "400", description = "Dados inválidos.",
-            content = @Content(schema = @Schema(hidden = true))),
+            content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class),
+                examples = {
+                    @ExampleObject(value = """
+                    {
+                      "timestamp": "2026-02-24T10:30:00",
+                      "status": 400,
+                      "erro": "MethodArgumentNotValidException",
+                      "mensagem": "tipoRelacao: Tipo de relação é obrigatório",
+                      "caminho": "/api/responsaveis/1"
+                    }
+                    """)
+                })),
         @ApiResponse(responseCode = "401", description = "Token ausente ou inválido.",
-            content = @Content(schema = @Schema(hidden = true))),
+            content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class),
+                examples = {
+                    @ExampleObject(value = """
+                    {
+                      "timestamp": "2026-02-24T10:30:00",
+                      "status": 401,
+                      "erro": "TokenInvalidoException",
+                      "mensagem": "Token JWT inválido ou expirado",
+                      "caminho": "/api/responsaveis/1"
+                    }
+                    """)
+                })),
         @ApiResponse(responseCode = "404", description = "Responsável não encontrado.",
-            content = @Content(schema = @Schema(hidden = true)))
+            content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class),
+                examples = {
+                    @ExampleObject(value = """
+                    {
+                      "timestamp": "2026-02-24T10:30:00",
+                      "status": 404,
+                      "erro": "ResponsavelNaoEncontradoException",
+                      "mensagem": "Responsável com ID 1 não encontrado",
+                      "caminho": "/api/responsaveis/1"
+                    }
+                    """)
+                }))
     })
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     ResponseEntity<ResponsavelResponseDTO> update(
         @Parameter(description = "ID do responsável.", required = true, example = "1")
         @PathVariable Long id,
@@ -85,12 +154,33 @@ public interface ResponsavelApi {
         description = "Desvincula o usuário da pessoa, removendo o registro de responsável."
     )
     @ApiResponses({
-        @ApiResponse(responseCode = "204", description = "Responsável removido com sucesso.",
-            content = @Content(schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "204", description = "Responsável removido com sucesso."),
         @ApiResponse(responseCode = "401", description = "Token ausente ou inválido.",
-            content = @Content(schema = @Schema(hidden = true))),
+            content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class),
+                examples = {
+                    @ExampleObject(value = """
+                    {
+                      "timestamp": "2026-02-24T10:30:00",
+                      "status": 401,
+                      "erro": "TokenInvalidoException",
+                      "mensagem": "Token JWT inválido ou expirado",
+                      "caminho": "/api/responsaveis/1"
+                    }
+                    """)
+                })),
         @ApiResponse(responseCode = "404", description = "Responsável não encontrado.",
-            content = @Content(schema = @Schema(hidden = true)))
+            content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class),
+                examples = {
+                    @ExampleObject(value = """
+                    {
+                      "timestamp": "2026-02-24T10:30:00",
+                      "status": 404,
+                      "erro": "ResponsavelNaoEncontradoException",
+                      "mensagem": "Responsável com ID 1 não encontrado",
+                      "caminho": "/api/responsaveis/1"
+                    }
+                    """)
+                }))
     })
     @DeleteMapping("/{id}")
     ResponseEntity<Void> delete(

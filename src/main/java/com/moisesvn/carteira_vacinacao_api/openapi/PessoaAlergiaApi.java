@@ -1,13 +1,16 @@
 package com.moisesvn.carteira_vacinacao_api.openapi;
 
-import com.moisesvn.carteira_vacinacao_api.dto.PessoaAlergiaListRequestItem;
-import com.moisesvn.carteira_vacinacao_api.dto.PessoaAlergiaObservacaoRequestDTO;
-import com.moisesvn.carteira_vacinacao_api.dto.PessoaAlergiaRequestDTO;
-import com.moisesvn.carteira_vacinacao_api.dto.PessoaAlergiaResponseDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.ErrorResponseDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.request.PessoaAlergiaListRequestItem;
+import com.moisesvn.carteira_vacinacao_api.dto.request.PessoaAlergiaObservacaoRequestDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.request.PessoaAlergiaRequestDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.response.PessoaAlergiaResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -32,11 +35,25 @@ public interface PessoaAlergiaApi {
     )
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso.",
-            content = @Content(schema = @Schema(implementation = PessoaAlergiaResponseDTO.class))),
+            content = @Content(array = @ArraySchema(schema = @Schema(implementation = PessoaAlergiaResponseDTO.class)))),
         @ApiResponse(responseCode = "401", description = "Token ausente ou inválido.",
-            content = @Content(schema = @Schema(hidden = true))),
+            content = @Content(
+                schema = @Schema(implementation = ErrorResponseDTO.class),
+                examples = {
+                    @ExampleObject(
+                        value = "{\"timestamp\":\"2026-02-24T10:30:00Z\",\"status\":401,\"erro\":\"InvalidTokenException\",\"mensagem\":\"Token inválido ou expirado\",\"caminho\":\"/api/pessoas/1/alergias\"}"
+                    )
+                }
+            )),
         @ApiResponse(responseCode = "404", description = "Pessoa não encontrada.",
-            content = @Content(schema = @Schema(hidden = true)))
+            content = @Content(
+                schema = @Schema(implementation = ErrorResponseDTO.class),
+                examples = {
+                    @ExampleObject(
+                        value = "{\"timestamp\":\"2026-02-24T10:30:00Z\",\"status\":404,\"erro\":\"PessoaNotFoundException\",\"mensagem\":\"Pessoa com ID 999 não encontrada\",\"caminho\":\"/api/pessoas/999/alergias\"}"
+                    )
+                }
+            ))
     })
     @GetMapping
     ResponseEntity<List<PessoaAlergiaResponseDTO>> listar(
@@ -52,11 +69,32 @@ public interface PessoaAlergiaApi {
         @ApiResponse(responseCode = "201", description = "Alergia vinculada com sucesso.",
             content = @Content(schema = @Schema(implementation = PessoaAlergiaResponseDTO.class))),
         @ApiResponse(responseCode = "400", description = "Dados inválidos.",
-            content = @Content(schema = @Schema(hidden = true))),
+            content = @Content(
+                schema = @Schema(implementation = ErrorResponseDTO.class),
+                examples = {
+                    @ExampleObject(
+                        value = "{\"timestamp\":\"2026-02-24T10:30:00Z\",\"status\":400,\"erro\":\"ValidationException\",\"mensagem\":\"Campo 'alergiaId' é obrigatório\",\"caminho\":\"/api/pessoas/1/alergias\"}"
+                    )
+                }
+            )),
         @ApiResponse(responseCode = "401", description = "Token ausente ou inválido.",
-            content = @Content(schema = @Schema(hidden = true))),
+            content = @Content(
+                schema = @Schema(implementation = ErrorResponseDTO.class),
+                examples = {
+                    @ExampleObject(
+                        value = "{\"timestamp\":\"2026-02-24T10:30:00Z\",\"status\":401,\"erro\":\"InvalidTokenException\",\"mensagem\":\"Token inválido ou expirado\",\"caminho\":\"/api/pessoas/1/alergias\"}"
+                    )
+                }
+            )),
         @ApiResponse(responseCode = "409", description = "Alergia já vinculada à pessoa.",
-            content = @Content(schema = @Schema(hidden = true)))
+            content = @Content(
+                schema = @Schema(implementation = ErrorResponseDTO.class),
+                examples = {
+                    @ExampleObject(
+                        value = "{\"timestamp\":\"2026-02-24T10:30:00Z\",\"status\":409,\"erro\":\"AlergiaJaVinculadaException\",\"mensagem\":\"Alergia com ID 5 já está vinculada a esta pessoa\",\"caminho\":\"/api/pessoas/1/alergias\"}"
+                    )
+                }
+            ))
     })
     @PostMapping
     ResponseEntity<PessoaAlergiaResponseDTO> criar(
@@ -71,13 +109,34 @@ public interface PessoaAlergiaApi {
     )
     @ApiResponses({
         @ApiResponse(responseCode = "201", description = "Alergias vinculadas com sucesso.",
-            content = @Content(schema = @Schema(implementation = PessoaAlergiaResponseDTO.class))),
+            content = @Content(array = @ArraySchema(schema = @Schema(implementation = PessoaAlergiaResponseDTO.class)))),
         @ApiResponse(responseCode = "400", description = "Dados inválidos.",
-            content = @Content(schema = @Schema(hidden = true))),
+            content = @Content(
+                schema = @Schema(implementation = ErrorResponseDTO.class),
+                examples = {
+                    @ExampleObject(
+                        value = "{\"timestamp\":\"2026-02-24T10:30:00Z\",\"status\":400,\"erro\":\"ValidationException\",\"mensagem\":\"Lista de alergias vazia ou inválida\",\"caminho\":\"/api/pessoas/1/alergias/lote\"}"
+                    )
+                }
+            )),
         @ApiResponse(responseCode = "401", description = "Token ausente ou inválido.",
-            content = @Content(schema = @Schema(hidden = true))),
+            content = @Content(
+                schema = @Schema(implementation = ErrorResponseDTO.class),
+                examples = {
+                    @ExampleObject(
+                        value = "{\"timestamp\":\"2026-02-24T10:30:00Z\",\"status\":401,\"erro\":\"InvalidTokenException\",\"mensagem\":\"Token inválido ou expirado\",\"caminho\":\"/api/pessoas/1/alergias/lote\"}"
+                    )
+                }
+            )),
         @ApiResponse(responseCode = "409", description = "Uma ou mais alergias já estão vinculadas.",
-            content = @Content(schema = @Schema(hidden = true)))
+            content = @Content(
+                schema = @Schema(implementation = ErrorResponseDTO.class),
+                examples = {
+                    @ExampleObject(
+                        value = "{\"timestamp\":\"2026-02-24T10:30:00Z\",\"status\":409,\"erro\":\"AlergiaJaVinculadaException\",\"mensagem\":\"Uma ou mais alergias já estão vinculadas: [5, 7]\",\"caminho\":\"/api/pessoas/1/alergias/lote\"}"
+                    )
+                }
+            ))
     })
     @PostMapping("/lote")
     ResponseEntity<List<PessoaAlergiaResponseDTO>> criarLote(
@@ -88,19 +147,40 @@ public interface PessoaAlergiaApi {
 
     @Operation(
         summary = "Atualizar observação do vínculo",
-        description = "Atualiza apenas o campo de observação de um vínculo existente entre pessoa e alergia."
+        description = "Atualiza parcialmente apenas o campo de observação de um vínculo existente entre pessoa e alergia."
     )
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Observação atualizada com sucesso.",
             content = @Content(schema = @Schema(implementation = PessoaAlergiaResponseDTO.class))),
         @ApiResponse(responseCode = "400", description = "Dados inválidos.",
-            content = @Content(schema = @Schema(hidden = true))),
+            content = @Content(
+                schema = @Schema(implementation = ErrorResponseDTO.class),
+                examples = {
+                    @ExampleObject(
+                        value = "{\"timestamp\":\"2026-02-24T10:30:00Z\",\"status\":400,\"erro\":\"ValidationException\",\"mensagem\":\"Campo 'observacao' não pode exceder 500 caracteres\",\"caminho\":\"/api/pessoas/1/alergias/3/observacao\"}"
+                    )
+                }
+            )),
         @ApiResponse(responseCode = "401", description = "Token ausente ou inválido.",
-            content = @Content(schema = @Schema(hidden = true))),
+            content = @Content(
+                schema = @Schema(implementation = ErrorResponseDTO.class),
+                examples = {
+                    @ExampleObject(
+                        value = "{\"timestamp\":\"2026-02-24T10:30:00Z\",\"status\":401,\"erro\":\"InvalidTokenException\",\"mensagem\":\"Token inválido ou expirado\",\"caminho\":\"/api/pessoas/1/alergias/3/observacao\"}"
+                    )
+                }
+            )),
         @ApiResponse(responseCode = "404", description = "Pessoa ou alergia não encontradas.",
-            content = @Content(schema = @Schema(hidden = true)))
+            content = @Content(
+                schema = @Schema(implementation = ErrorResponseDTO.class),
+                examples = {
+                    @ExampleObject(
+                        value = "{\"timestamp\":\"2026-02-24T10:30:00Z\",\"status\":404,\"erro\":\"PessoaNotFoundException\",\"mensagem\":\"Pessoa com ID 999 não encontrada\",\"caminho\":\"/api/pessoas/999/alergias/3/observacao\"}"
+                    )
+                }
+            ))
     })
-    @PutMapping("/{alergiaId}/observacao")
+    @PatchMapping("/{alergiaId}/observacao")
     ResponseEntity<PessoaAlergiaResponseDTO> atualizarObservacao(
         @Parameter(description = "ID da pessoa.", required = true, example = "1")
         @PathVariable Long pessoaId,
@@ -114,12 +194,25 @@ public interface PessoaAlergiaApi {
         description = "Limpa o campo de observação, mantendo o vínculo entre pessoa e alergia ativo."
     )
     @ApiResponses({
-        @ApiResponse(responseCode = "204", description = "Observação removida com sucesso.",
-            content = @Content(schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "204", description = "Observação removida com sucesso."),
         @ApiResponse(responseCode = "401", description = "Token ausente ou inválido.",
-            content = @Content(schema = @Schema(hidden = true))),
+            content = @Content(
+                schema = @Schema(implementation = ErrorResponseDTO.class),
+                examples = {
+                    @ExampleObject(
+                        value = "{\"timestamp\":\"2026-02-24T10:30:00Z\",\"status\":401,\"erro\":\"InvalidTokenException\",\"mensagem\":\"Token inválido ou expirado\",\"caminho\":\"/api/pessoas/1/alergias/3/observacao\"}"
+                    )
+                }
+            )),
         @ApiResponse(responseCode = "404", description = "Pessoa ou alergia não encontradas.",
-            content = @Content(schema = @Schema(hidden = true)))
+            content = @Content(
+                schema = @Schema(implementation = ErrorResponseDTO.class),
+                examples = {
+                    @ExampleObject(
+                        value = "{\"timestamp\":\"2026-02-24T10:30:00Z\",\"status\":404,\"erro\":\"PessoaNotFoundException\",\"mensagem\":\"Pessoa com ID 999 não encontrada\",\"caminho\":\"/api/pessoas/999/alergias/3/observacao\"}"
+                    )
+                }
+            ))
     })
     @DeleteMapping("/{alergiaId}/observacao")
     ResponseEntity<Void> deletarObservacao(
@@ -134,12 +227,25 @@ public interface PessoaAlergiaApi {
         description = "Remove completamente o vínculo entre a pessoa e a alergia."
     )
     @ApiResponses({
-        @ApiResponse(responseCode = "204", description = "Vínculo removido com sucesso.",
-            content = @Content(schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "204", description = "Vínculo removido com sucesso."),
         @ApiResponse(responseCode = "401", description = "Token ausente ou inválido.",
-            content = @Content(schema = @Schema(hidden = true))),
+            content = @Content(
+                schema = @Schema(implementation = ErrorResponseDTO.class),
+                examples = {
+                    @ExampleObject(
+                        value = "{\"timestamp\":\"2026-02-24T10:30:00Z\",\"status\":401,\"erro\":\"InvalidTokenException\",\"mensagem\":\"Token inválido ou expirado\",\"caminho\":\"/api/pessoas/1/alergias/3\"}"
+                    )
+                }
+            )),
         @ApiResponse(responseCode = "404", description = "Pessoa ou alergia não encontradas.",
-            content = @Content(schema = @Schema(hidden = true)))
+            content = @Content(
+                schema = @Schema(implementation = ErrorResponseDTO.class),
+                examples = {
+                    @ExampleObject(
+                        value = "{\"timestamp\":\"2026-02-24T10:30:00Z\",\"status\":404,\"erro\":\"PessoaNotFoundException\",\"mensagem\":\"Pessoa com ID 999 não encontrada\",\"caminho\":\"/api/pessoas/999/alergias/3\"}"
+                    )
+                }
+            ))
     })
     @DeleteMapping("/{alergiaId}")
     ResponseEntity<Void> deletar(

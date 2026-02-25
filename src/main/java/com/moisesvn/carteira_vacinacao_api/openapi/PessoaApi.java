@@ -1,10 +1,13 @@
 package com.moisesvn.carteira_vacinacao_api.openapi;
 
-import com.moisesvn.carteira_vacinacao_api.dto.PessoaRequestDTO;
-import com.moisesvn.carteira_vacinacao_api.dto.PessoaResponseDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.ErrorResponseDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.request.PessoaRequestDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.response.PessoaResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -32,9 +35,27 @@ public interface PessoaApi {
         @ApiResponse(responseCode = "201", description = "Pessoa cadastrada com sucesso.",
             content = @Content(schema = @Schema(implementation = PessoaResponseDTO.class))),
         @ApiResponse(responseCode = "400", description = "Dados inválidos ou incompletos.",
-            content = @Content(schema = @Schema(hidden = true))),
+            content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class),
+                examples = @ExampleObject(value = """
+                    {
+                      "timestamp": "2026-02-24T10:30:00",
+                      "status": 400,
+                      "erro": "MethodArgumentNotValidException",
+                      "mensagem": "cns: CNS é obrigatório",
+                      "caminho": "/api/pessoas"
+                    }
+                    """))),
         @ApiResponse(responseCode = "401", description = "Token ausente ou inválido.",
-            content = @Content(schema = @Schema(hidden = true)))
+            content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class),
+                examples = @ExampleObject(value = """
+                    {
+                      "timestamp": "2026-02-24T10:30:00",
+                      "status": 401,
+                      "erro": "TokenInvalidoException",
+                      "mensagem": "Token JWT inválido ou expirado",
+                      "caminho": "/api/pessoas"
+                    }
+                    """)))
     })
     @PostMapping
     ResponseEntity<PessoaResponseDTO> create(@Valid @RequestBody PessoaRequestDTO dto);
@@ -47,9 +68,27 @@ public interface PessoaApi {
         @ApiResponse(responseCode = "200", description = "Pessoa encontrada.",
             content = @Content(schema = @Schema(implementation = PessoaResponseDTO.class))),
         @ApiResponse(responseCode = "401", description = "Token ausente ou inválido.",
-            content = @Content(schema = @Schema(hidden = true))),
+            content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class),
+                examples = @ExampleObject(value = """
+                    {
+                      "timestamp": "2026-02-24T10:30:00",
+                      "status": 401,
+                      "erro": "TokenInvalidoException",
+                      "mensagem": "Token JWT inválido ou expirado",
+                      "caminho": "/api/pessoas/1"
+                    }
+                    """))),
         @ApiResponse(responseCode = "404", description = "Pessoa não encontrada.",
-            content = @Content(schema = @Schema(hidden = true)))
+            content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class),
+                examples = @ExampleObject(value = """
+                    {
+                      "timestamp": "2026-02-24T10:30:00",
+                      "status": 404,
+                      "erro": "PessoaNaoEncontradaException",
+                      "mensagem": "Pessoa com ID 1 não encontrada",
+                      "caminho": "/api/pessoas/1"
+                    }
+                    """)))
     })
     @GetMapping("/{id}")
     ResponseEntity<PessoaResponseDTO> getById(
@@ -63,9 +102,18 @@ public interface PessoaApi {
     )
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso.",
-            content = @Content(schema = @Schema(implementation = PessoaResponseDTO.class))),
+            content = @Content(array = @ArraySchema(schema = @Schema(implementation = PessoaResponseDTO.class)))),
         @ApiResponse(responseCode = "401", description = "Token ausente ou inválido.",
-            content = @Content(schema = @Schema(hidden = true)))
+            content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class),
+                examples = @ExampleObject(value = """
+                    {
+                      "timestamp": "2026-02-24T10:30:00",
+                      "status": 401,
+                      "erro": "TokenInvalidoException",
+                      "mensagem": "Token JWT inválido ou expirado",
+                      "caminho": "/api/pessoas"
+                    }
+                    """)))
     })
     @GetMapping
     ResponseEntity<List<PessoaResponseDTO>> listAll();
@@ -78,11 +126,38 @@ public interface PessoaApi {
         @ApiResponse(responseCode = "200", description = "Dados atualizados com sucesso.",
             content = @Content(schema = @Schema(implementation = PessoaResponseDTO.class))),
         @ApiResponse(responseCode = "400", description = "Dados inválidos.",
-            content = @Content(schema = @Schema(hidden = true))),
+            content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class),
+                examples = @ExampleObject(value = """
+                    {
+                      "timestamp": "2026-02-24T10:30:00",
+                      "status": 400,
+                      "erro": "MethodArgumentNotValidException",
+                      "mensagem": "dataNascimento: Data de nascimento é obrigatória",
+                      "caminho": "/api/pessoas/1"
+                    }
+                    """))),
         @ApiResponse(responseCode = "401", description = "Token ausente ou inválido.",
-            content = @Content(schema = @Schema(hidden = true))),
+            content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class),
+                examples = @ExampleObject(value = """
+                    {
+                      "timestamp": "2026-02-24T10:30:00",
+                      "status": 401,
+                      "erro": "TokenInvalidoException",
+                      "mensagem": "Token JWT inválido ou expirado",
+                      "caminho": "/api/pessoas/1"
+                    }
+                    """))),
         @ApiResponse(responseCode = "404", description = "Pessoa não encontrada.",
-            content = @Content(schema = @Schema(hidden = true)))
+            content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class),
+                examples = @ExampleObject(value = """
+                    {
+                      "timestamp": "2026-02-24T10:30:00",
+                      "status": 404,
+                      "erro": "PessoaNaoEncontradaException",
+                      "mensagem": "Pessoa com ID 1 não encontrada",
+                      "caminho": "/api/pessoas/1"
+                    }
+                    """)))
     })
     @PutMapping("/{id}")
     ResponseEntity<PessoaResponseDTO> update(
@@ -96,12 +171,29 @@ public interface PessoaApi {
         description = "Remove permanentemente uma pessoa e todos os seus registros de vacinação e alergias."
     )
     @ApiResponses({
-        @ApiResponse(responseCode = "204", description = "Pessoa removida com sucesso.",
-            content = @Content(schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "204", description = "Pessoa removida com sucesso."),
         @ApiResponse(responseCode = "401", description = "Token ausente ou inválido.",
-            content = @Content(schema = @Schema(hidden = true))),
+            content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class),
+                examples = @ExampleObject(value = """
+                    {
+                      "timestamp": "2026-02-24T10:30:00",
+                      "status": 401,
+                      "erro": "TokenInvalidoException",
+                      "mensagem": "Token JWT inválido ou expirado",
+                      "caminho": "/api/pessoas/1"
+                    }
+                    """))),
         @ApiResponse(responseCode = "404", description = "Pessoa não encontrada.",
-            content = @Content(schema = @Schema(hidden = true)))
+            content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class),
+                examples = @ExampleObject(value = """
+                    {
+                      "timestamp": "2026-02-24T10:30:00",
+                      "status": 404,
+                      "erro": "PessoaNaoEncontradaException",
+                      "mensagem": "Pessoa com ID 1 não encontrada",
+                      "caminho": "/api/pessoas/1"
+                    }
+                    """)))
     })
     @DeleteMapping("/{id}")
     ResponseEntity<Void> delete(

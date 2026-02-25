@@ -1,8 +1,8 @@
 package com.moisesvn.carteira_vacinacao_api.service;
 
-import com.moisesvn.carteira_vacinacao_api.dto.UsuarioRequestDTO;
-import com.moisesvn.carteira_vacinacao_api.dto.UsuarioResponseDTO;
-import com.moisesvn.carteira_vacinacao_api.dto.UsuarioUpdateRequestDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.request.UsuarioRequestDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.response.UsuarioResponseDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.request.UsuarioUpdateRequestDTO;
 import com.moisesvn.carteira_vacinacao_api.exception.EmailJaCadastradoException;
 import com.moisesvn.carteira_vacinacao_api.exception.UsuarioNaoEncontradoException;
 import com.moisesvn.carteira_vacinacao_api.model.Usuario;

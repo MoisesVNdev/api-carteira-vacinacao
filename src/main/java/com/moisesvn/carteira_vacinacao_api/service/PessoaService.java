@@ -1,17 +1,15 @@
 package com.moisesvn.carteira_vacinacao_api.service;
 
-import com.moisesvn.carteira_vacinacao_api.dto.PessoaRequestDTO;
-import com.moisesvn.carteira_vacinacao_api.dto.PessoaResponseDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.request.PessoaRequestDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.response.PessoaResponseDTO;
 import com.moisesvn.carteira_vacinacao_api.exception.CnsJaCadastradoException;
 import com.moisesvn.carteira_vacinacao_api.exception.CpfJaCadastradoException;
 import com.moisesvn.carteira_vacinacao_api.exception.PessoaNaoEncontradaException;
 import com.moisesvn.carteira_vacinacao_api.exception.UsuarioNaoEncontradoException;
 import com.moisesvn.carteira_vacinacao_api.mapper.PessoaMapper;
 import com.moisesvn.carteira_vacinacao_api.model.Pessoa;
-import com.moisesvn.carteira_vacinacao_api.model.Responsavel;
 import com.moisesvn.carteira_vacinacao_api.model.Usuario;
 import com.moisesvn.carteira_vacinacao_api.repository.PessoaRepository;
-import com.moisesvn.carteira_vacinacao_api.repository.ResponsavelRepository;
 import com.moisesvn.carteira_vacinacao_api.repository.UsuarioRepository;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,12 +25,15 @@ import org.springframework.transaction.annotation.Transactional;
 public class PessoaService {
 
     private final PessoaRepository pessoaRepository;
-    private final ResponsavelRepository responsavelRepository;
+    private final ResponsavelService responsavelService;
     private final UsuarioRepository usuarioRepository;
 
     /**
      * Cria uma nova pessoa e automaticamente cria o vínculo de responsável
      * com o usuário autenticado (extraído do JWT via SecurityContext).
+     * 
+     * Delega a criação do Responsavel para ResponsavelService,
+     * mantendo cada serviço com responsabilidade única.
      * 
      * @param dto Dados da pessoa a ser criada (inclui tipoRelacao)
      * @return DTO com os dados da pessoa criada
@@ -71,16 +72,8 @@ public class PessoaService {
         
         log.info("Pessoa criada com sucesso. ID: {}, CNS: {}", saved.getId(), saved.getCns());
         
-        // 4. Criar automaticamente o registro de Responsavel
-        Responsavel responsavel = Responsavel.builder()
-            .usuario(usuario)
-            .pessoa(saved)
-            .tipoRelacao(dto.tipoRelacao())
-            .build();
-        responsavelRepository.save(responsavel);
-        
-        log.info("Vínculo de responsável criado automaticamente. Usuario ID: {}, Pessoa ID: {}, Tipo: {}", 
-                 usuario.getId(), saved.getId(), dto.tipoRelacao());
+        // 4. Delegar criação do Responsavel para ResponsavelService (SRP)
+        responsavelService.criarAutomaticamente(usuario, saved, dto.tipoRelacao());
         
         return PessoaMapper.toResponseDto(saved);
     }

@@ -1,8 +1,8 @@
 package com.moisesvn.carteira_vacinacao_api.controller;
 
-import com.moisesvn.carteira_vacinacao_api.dto.CalendarioVacinalItemResponseDTO;
-import com.moisesvn.carteira_vacinacao_api.dto.RegistroVacinaRequestDTO;
-import com.moisesvn.carteira_vacinacao_api.dto.RegistroVacinaResponseDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.response.CalendarioVacinalItemResponseDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.request.RegistroVacinaRequestDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.response.RegistroVacinaResponseDTO;
 import com.moisesvn.carteira_vacinacao_api.openapi.RegistroVacinaApi;
 import com.moisesvn.carteira_vacinacao_api.service.RegistroVacinaService;
 import jakarta.validation.Valid;
@@ -23,7 +23,7 @@ import java.util.List;
  * O usuario_id é extraído do token — nunca recebido no body.
  */
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/registros-vacina")
 @RequiredArgsConstructor
 public class RegistroVacinaController implements RegistroVacinaApi {
 

@@ -1,9 +1,9 @@
 package com.moisesvn.carteira_vacinacao_api.service;
 
-import com.moisesvn.carteira_vacinacao_api.dto.PessoaAlergiaListRequestItem;
-import com.moisesvn.carteira_vacinacao_api.dto.PessoaAlergiaObservacaoRequestDTO;
-import com.moisesvn.carteira_vacinacao_api.dto.PessoaAlergiaRequestDTO;
-import com.moisesvn.carteira_vacinacao_api.dto.PessoaAlergiaResponseDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.request.PessoaAlergiaListRequestItem;
+import com.moisesvn.carteira_vacinacao_api.dto.request.PessoaAlergiaObservacaoRequestDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.request.PessoaAlergiaRequestDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.response.PessoaAlergiaResponseDTO;
 import com.moisesvn.carteira_vacinacao_api.exception.AlergiaNotFoundException;
 import com.moisesvn.carteira_vacinacao_api.exception.PessoaAlergiaJaCadastradoException;
 import com.moisesvn.carteira_vacinacao_api.exception.PessoaAlergiaNotFoundException;

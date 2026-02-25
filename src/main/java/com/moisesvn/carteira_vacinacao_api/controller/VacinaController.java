@@ -1,7 +1,7 @@
 package com.moisesvn.carteira_vacinacao_api.controller;
 
-import com.moisesvn.carteira_vacinacao_api.dto.EsquemaVacinalResponseDTO;
-import com.moisesvn.carteira_vacinacao_api.dto.VacinaResponseDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.response.EsquemaVacinalResponseDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.response.VacinaResponseDTO;
 import com.moisesvn.carteira_vacinacao_api.openapi.VacinaApi;
 import com.moisesvn.carteira_vacinacao_api.service.EsquemaVacinalService;
 import com.moisesvn.carteira_vacinacao_api.service.VacinaService;

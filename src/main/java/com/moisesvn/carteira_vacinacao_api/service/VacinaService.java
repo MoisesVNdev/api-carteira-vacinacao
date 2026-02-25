@@ -1,6 +1,6 @@
 package com.moisesvn.carteira_vacinacao_api.service;
 
-import com.moisesvn.carteira_vacinacao_api.dto.VacinaResponseDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.response.VacinaResponseDTO;
 import com.moisesvn.carteira_vacinacao_api.exception.VacinaNotFoundException;
 import com.moisesvn.carteira_vacinacao_api.mapper.VacinaMapper;
 import com.moisesvn.carteira_vacinacao_api.repository.VacinaRepository;

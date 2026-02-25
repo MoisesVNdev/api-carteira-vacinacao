@@ -1,8 +1,8 @@
 package com.moisesvn.carteira_vacinacao_api.service;
 
-import com.moisesvn.carteira_vacinacao_api.dto.CalendarioVacinalItemResponseDTO;
-import com.moisesvn.carteira_vacinacao_api.dto.RegistroVacinaRequestDTO;
-import com.moisesvn.carteira_vacinacao_api.dto.RegistroVacinaResponseDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.response.CalendarioVacinalItemResponseDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.request.RegistroVacinaRequestDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.response.RegistroVacinaResponseDTO;
 import com.moisesvn.carteira_vacinacao_api.exception.*;
 import com.moisesvn.carteira_vacinacao_api.mapper.RegistroVacinaMapper;
 import com.moisesvn.carteira_vacinacao_api.model.*;

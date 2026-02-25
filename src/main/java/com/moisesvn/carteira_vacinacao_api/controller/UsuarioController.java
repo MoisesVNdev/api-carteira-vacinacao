@@ -1,8 +1,8 @@
 package com.moisesvn.carteira_vacinacao_api.controller;
 
-import com.moisesvn.carteira_vacinacao_api.dto.UsuarioRequestDTO;
-import com.moisesvn.carteira_vacinacao_api.dto.UsuarioResponseDTO;
-import com.moisesvn.carteira_vacinacao_api.dto.UsuarioUpdateRequestDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.request.UsuarioRequestDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.response.UsuarioResponseDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.request.UsuarioUpdateRequestDTO;
 import com.moisesvn.carteira_vacinacao_api.openapi.UsuarioApi;
 import com.moisesvn.carteira_vacinacao_api.service.UsuarioService;
 import jakarta.validation.Valid;
@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/usuarios")
+@RequestMapping("/api/v1/usuarios")
 @RequiredArgsConstructor
 public class UsuarioController implements UsuarioApi {
 

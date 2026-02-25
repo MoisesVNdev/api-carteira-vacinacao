@@ -50,8 +50,8 @@ public class SecurityConfiguration {
             .authorizeHttpRequests(authz -> authz
                 // Endpoints públicos
                 .requestMatchers("/health", "/actuator/**").permitAll()
-                .requestMatchers("/auth/**").permitAll()
-                .requestMatchers(HttpMethod.POST, "/usuarios").permitAll()
+                .requestMatchers("/api/v1/auth/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/v1/usuarios").permitAll()
                 // Swagger UI e documentação OpenAPI
                 .requestMatchers(
                     "/api-docs/**",

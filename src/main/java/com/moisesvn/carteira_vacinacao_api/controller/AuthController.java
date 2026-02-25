@@ -1,9 +1,9 @@
 package com.moisesvn.carteira_vacinacao_api.controller;
 
-import com.moisesvn.carteira_vacinacao_api.dto.LoginRequestDTO;
-import com.moisesvn.carteira_vacinacao_api.dto.LoginResponseDTO;
-import com.moisesvn.carteira_vacinacao_api.dto.RegisterRequestDTO;
-import com.moisesvn.carteira_vacinacao_api.dto.UsuarioResponseDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.request.LoginRequestDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.response.LoginResponseDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.request.RegisterRequestDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.response.UsuarioResponseDTO;
 import com.moisesvn.carteira_vacinacao_api.openapi.AuthApi;
 import com.moisesvn.carteira_vacinacao_api.service.AuthenticationService;
 import jakarta.validation.Valid;
@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 public class AuthController implements AuthApi {
 

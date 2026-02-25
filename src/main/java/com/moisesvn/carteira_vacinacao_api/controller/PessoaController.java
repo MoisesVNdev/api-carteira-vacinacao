@@ -1,7 +1,7 @@
 package com.moisesvn.carteira_vacinacao_api.controller;
 
-import com.moisesvn.carteira_vacinacao_api.dto.PessoaRequestDTO;
-import com.moisesvn.carteira_vacinacao_api.dto.PessoaResponseDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.request.PessoaRequestDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.response.PessoaResponseDTO;
 import com.moisesvn.carteira_vacinacao_api.openapi.PessoaApi;
 import com.moisesvn.carteira_vacinacao_api.service.PessoaService;
 import java.net.URI;
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
-@RequestMapping("/api/pessoas")
+@RequestMapping("/api/v1/pessoas")
 @RequiredArgsConstructor
 public class PessoaController implements PessoaApi {
 

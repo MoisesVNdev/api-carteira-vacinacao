@@ -1,6 +1,6 @@
 package com.moisesvn.carteira_vacinacao_api.mapper;
 
-import com.moisesvn.carteira_vacinacao_api.dto.RegistroVacinaResponseDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.response.RegistroVacinaResponseDTO;
 import com.moisesvn.carteira_vacinacao_api.model.RegistroVacina;
 
 /**

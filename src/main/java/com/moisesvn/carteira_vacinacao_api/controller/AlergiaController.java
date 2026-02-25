@@ -1,6 +1,6 @@
 package com.moisesvn.carteira_vacinacao_api.controller;
 
-import com.moisesvn.carteira_vacinacao_api.dto.AlergiaResponseDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.response.AlergiaResponseDTO;
 import com.moisesvn.carteira_vacinacao_api.openapi.AlergiaApi;
 import com.moisesvn.carteira_vacinacao_api.service.AlergiaService;
 import lombok.RequiredArgsConstructor;

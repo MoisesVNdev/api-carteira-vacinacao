@@ -1,7 +1,7 @@
 package com.moisesvn.carteira_vacinacao_api.controller;
 
-import com.moisesvn.carteira_vacinacao_api.dto.ResponsavelResponseDTO;
-import com.moisesvn.carteira_vacinacao_api.dto.ResponsavelUpdateRequestDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.response.ResponsavelResponseDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.request.ResponsavelUpdateRequestDTO;
 import com.moisesvn.carteira_vacinacao_api.openapi.ResponsavelApi;
 import com.moisesvn.carteira_vacinacao_api.service.ResponsavelService;
 import jakarta.validation.Valid;
@@ -21,7 +21,7 @@ import java.util.List;
  * Este controller expõe apenas operações de consulta, atualização e exclusão.
  */
 @RestController
-@RequestMapping("/api/responsaveis")
+@RequestMapping("/api/v1/responsaveis")
 @RequiredArgsConstructor
 public class ResponsavelController implements ResponsavelApi {
 
@@ -36,7 +36,7 @@ public class ResponsavelController implements ResponsavelApi {
     @Override
     public ResponseEntity<ResponsavelResponseDTO> getById(@PathVariable Long id) {
         ResponsavelResponseDTO dto = responsavelService.findById(id);
-        return dto == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(dto);
+        return ResponseEntity.ok(dto);
     }
 
     @Override

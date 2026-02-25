@@ -1,8 +1,8 @@
 package com.moisesvn.carteira_vacinacao_api.service;
 
-import com.moisesvn.carteira_vacinacao_api.dto.ResponsavelRequestDTO;
-import com.moisesvn.carteira_vacinacao_api.dto.ResponsavelResponseDTO;
-import com.moisesvn.carteira_vacinacao_api.dto.ResponsavelUpdateRequestDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.request.ResponsavelRequestDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.response.ResponsavelResponseDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.request.ResponsavelUpdateRequestDTO;
 import com.moisesvn.carteira_vacinacao_api.exception.PessoaNaoEncontradaException;
 import com.moisesvn.carteira_vacinacao_api.exception.ResponsavelJaCadastradoException;
 import com.moisesvn.carteira_vacinacao_api.exception.ResponsavelNaoEncontradoException;
@@ -30,6 +30,29 @@ public class ResponsavelService {
     private final ResponsavelRepository responsavelRepository;
     private final UsuarioRepository usuarioRepository;
     private final PessoaRepository pessoaRepository;
+
+    /**
+     * Cria automaticamente um vínculo de responsável após a criação de uma pessoa.
+     * Esta é uma operação interna (chamada pelo PessoaService).
+     * 
+     * @param usuario Usuário responsável (já validado)
+     * @param pessoa Pessoa criada (já persistida)
+     * @param tipoRelacao Tipo de relação (ex: MAE, PAI, RESPONSAVEL, etc)
+     */
+    @Transactional
+    public void criarAutomaticamente(Usuario usuario, Pessoa pessoa, String tipoRelacao) {
+        log.info("Criando vínculo de responsável automaticamente. Usuario ID: {}, Pessoa ID: {}, Tipo: {}", 
+                usuario.getId(), pessoa.getId(), tipoRelacao);
+        
+        Responsavel responsavel = Responsavel.builder()
+                .usuario(usuario)
+                .pessoa(pessoa)
+                .tipoRelacao(tipoRelacao)
+                .build();
+        responsavelRepository.save(responsavel);
+        
+        log.info("Vínculo de responsável criado com sucesso");
+    }
 
     /**
      * Cria um vínculo de responsável manualmente.
@@ -96,7 +119,7 @@ public class ResponsavelService {
     public ResponsavelResponseDTO findById(Long id) {
         return responsavelRepository.findById(id)
                 .map(ResponsavelMapper::toResponseDto)
-                .orElse(null);
+                .orElseThrow(() -> new ResponsavelNaoEncontradoException(id));
     }
 
     @Transactional

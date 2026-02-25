@@ -1,9 +1,9 @@
 package com.moisesvn.carteira_vacinacao_api.service;
 
-import com.moisesvn.carteira_vacinacao_api.dto.LoginRequestDTO;
-import com.moisesvn.carteira_vacinacao_api.dto.LoginResponseDTO;
-import com.moisesvn.carteira_vacinacao_api.dto.RegisterRequestDTO;
-import com.moisesvn.carteira_vacinacao_api.dto.UsuarioResponseDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.request.LoginRequestDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.response.LoginResponseDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.request.RegisterRequestDTO;
+import com.moisesvn.carteira_vacinacao_api.dto.response.UsuarioResponseDTO;
 import com.moisesvn.carteira_vacinacao_api.exception.InvalidCredentialsException;
 import com.moisesvn.carteira_vacinacao_api.security.JwtService;
 import lombok.RequiredArgsConstructor;
@@ -61,8 +61,8 @@ public class AuthenticationService {
      */
     public UsuarioResponseDTO registrar(RegisterRequestDTO request) {
         // Reutiliza UsuarioService para manter DRY e Single Responsibility
-        com.moisesvn.carteira_vacinacao_api.dto.UsuarioRequestDTO dto =
-                new com.moisesvn.carteira_vacinacao_api.dto.UsuarioRequestDTO();
+        com.moisesvn.carteira_vacinacao_api.dto.request.UsuarioRequestDTO dto =
+                new com.moisesvn.carteira_vacinacao_api.dto.request.UsuarioRequestDTO();
         dto.setNomeCompleto(request.getNomeCompleto());
         dto.setEmail(request.getEmail());
         dto.setSenha(request.getSenha());
