@@ -1,0 +1,712 @@
+### ======================================
+### 💉 CARTEIRA DE VACINAÇÃO API - TESTE DE VALIDAÇÃO COMPLETO
+### ======================================
+### 📝 CENÁRIO DE TESTE:
+### 1. Criar usuários João (pai) e Maria (mãe)
+### 2. Login com Maria → criar pessoa Ana (filha)
+### 3. Maria registra 5 tipos de vacinas para Ana
+### 4. Login com João → vincular Ana ao seu cadastro
+### 5. João adiciona 3 alergias para Ana
+### 6. João consulta histórico de vacinas de Ana
+### 7. Maria consulta alergias de Ana
+### ======================================
+
+### Variáveis Globais
+@baseUrl = http://localhost:8080
+@tokenMaria = {{loginMaria.response.body.token}}
+@tokenJoao = {{loginJoao.response.body.token}}
+@anaId = {{cadastrarAna.response.body.id}}
+
+###############################################################################
+### 1️⃣ CRIAR USUÁRIA MARIA (MÃE)
+###############################################################################
+### 📌 O quê: Registrar usuária Maria da Silva no sistema
+### ✅ Resposta esperada: 201 Created
+### 🔓 Não requer autenticação
+### 📋 Próximo passo: Fazer login com Maria
+###############################################################################
+# @name registerMaria
+POST {{baseUrl}}/api/v1/auth/register
+Content-Type: application/json
+
+{
+  "nomeCompleto": "Maria da Silva",
+  "email": "maria.silva@email.com",
+  "senha": "Senha@123"
+}
+
+###############################################################################
+### 2️⃣ CRIAR USUÁRIO JOÃO (PAI)
+###############################################################################
+### 📌 O quê: Registrar usuário João Santos no sistema
+### ✅ Resposta esperada: 201 Created
+### 🔓 Não requer autenticação
+### 📋 Próximo passo: Fazer login com João
+###############################################################################
+# @name registerJoao
+POST {{baseUrl}}/api/v1/auth/register
+Content-Type: application/json
+
+{
+  "nomeCompleto": "João Santos",
+  "email": "joao.santos@email.com",
+  "senha": "Senha@123"
+}
+
+###############################################################################
+### 3️⃣ LOGIN COM MARIA
+###############################################################################
+### 📌 O quê: Autenticar Maria e obter token JWT
+### ✅ Resposta esperada: 200 OK com token
+### 🔓 Não requer autenticação (login é público)
+### 💡 Token será usado em @tokenMaria
+###############################################################################
+# @name loginMaria
+POST {{baseUrl}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "maria.silva@email.com",
+  "senha": "Senha@123"
+}
+
+###############################################################################
+### 4️⃣ CADASTRAR PESSOA ANA (FILHA DE MARIA)
+###############################################################################
+### 📌 O quê: Maria cadastra sua filha Ana no sistema
+### ✅ Resposta esperada: 201 Created
+### 🔐 Requer autenticação: Bearer {{tokenMaria}}
+### 💡 Ana nasceu em 01/01/2020 (6 anos na data atual)
+### 📋 Próximo passo: Registrar vacinas para Ana
+###############################################################################
+# @name cadastrarAna
+POST {{baseUrl}}/api/v1/pessoas
+Authorization: Bearer {{tokenMaria}}
+Content-Type: application/json
+
+{
+  "nomeCompleto": "Ana Silva Santos",
+  "dataNascimento": "2020-01-01",
+  "cns": "898001160000000",
+  "cpf": "12345678901",
+  "nomeMae": "Maria da Silva",
+  "genero": "FEMININO",
+  "nacionalidade": "Brasileira",
+  "naturalidade": "Sao Paulo",
+  "tipoSanguineo": "O+",
+  "foto": "https://exemplo.com/foto-ana.jpg",
+  "tipoRelacao": "FILHA"
+}
+
+###############################################################################
+### 5️⃣ LISTAR VACINAS DO CATÁLOGO PNI
+###############################################################################
+### 📌 O quê: Consultar catálogo completo de vacinas disponíveis
+### ✅ Resposta esperada: 200 OK com lista de vacinas
+### 🔐 Requer autenticação: Bearer {{tokenMaria}}
+### 💡 Use esta lista para identificar IDs das vacinas
+### 📋 Próximo passo: Consultar esquemas vacinais de cada vacina
+###############################################################################
+GET {{baseUrl}}/api/v1/vacinas
+Authorization: Bearer {{tokenMaria}}
+Content-Type: application/json
+
+###############################################################################
+### 6️⃣ CONSULTAR ESQUEMAS VACINAIS - BCG (DOSE ÚNICA)
+###############################################################################
+### 📌 O quê: Obter doses da vacina BCG (ID 1)
+### ✅ Resposta esperada: 200 OK com 1 dose
+### 🔐 Requer autenticação: Bearer {{tokenMaria}}
+### 💡 BCG: dose única ao nascer
+###############################################################################
+GET {{baseUrl}}/api/v1/vacinas/1/esquema
+Authorization: Bearer {{tokenMaria}}
+Content-Type: application/json
+
+###############################################################################
+### 7️⃣ REGISTRAR VACINA BCG (DOSE ÚNICA)
+###############################################################################
+### 📌 O quê: Registrar dose única da BCG aplicada ao nascer
+### ✅ Resposta esperada: 201 Created
+### 🔐 Requer autenticação: Bearer {{tokenMaria}}
+### 💡 BCG - Dose única (esquemaVacinalId = 1)
+### 📅 Data: 05/01/2020 (4 dias após nascimento)
+###############################################################################
+POST {{baseUrl}}/api/v1/registros-vacina/registros
+Authorization: Bearer {{tokenMaria}}
+Content-Type: application/json
+
+{
+  "pessoaId": {{anaId}},
+  "esquemaVacinalId": 1,
+  "dataAplicacao": "2020-01-05",
+  "lote": "LOT-2020-BCG-001",
+  "fabricante": "Fundação Ataulpho de Paiva",
+  "vacinador": "Enfermeira Carla Mendes",
+  "localAplicacao": "Maternidade Santa Maria - São Paulo/SP"
+}
+
+###############################################################################
+### 8️⃣ CONSULTAR ESQUEMAS VACINAIS - HEPATITE B (MÚLTIPLAS DOSES)
+###############################################################################
+### 📌 O quê: Obter doses da vacina Hepatite B (ID 2)
+### ✅ Resposta esperada: 200 OK com 3 doses
+### 🔐 Requer autenticação: Bearer {{tokenMaria}}
+### 💡 Hepatite B: ao nascer, 1 mês, 6 meses
+###############################################################################
+GET {{baseUrl}}/api/v1/vacinas/2/esquema
+Authorization: Bearer {{tokenMaria}}
+Content-Type: application/json
+
+###############################################################################
+### 9️⃣ REGISTRAR HEPATITE B - 1ª DOSE
+###############################################################################
+### 📌 O quê: Registrar 1ª dose da Hepatite B
+### ✅ Resposta esperada: 201 Created
+### 🔐 Requer autenticação: Bearer {{tokenMaria}}
+### 💡 Hepatite B - 1ª Dose ao nascer (esquemaVacinalId = 2)
+### 📅 Data: 05/01/2020 (junto com BCG)
+###############################################################################
+POST {{baseUrl}}/api/v1/registros-vacina/registros
+Authorization: Bearer {{tokenMaria}}
+Content-Type: application/json
+
+{
+  "pessoaId": {{anaId}},
+  "esquemaVacinalId": 2,
+  "dataAplicacao": "2020-01-05",
+  "lote": "LOT-2020-HEPA-001",
+  "fabricante": "Instituto Butantan",
+  "vacinador": "Enfermeira Carla Mendes",
+  "localAplicacao": "Maternidade Santa Maria - São Paulo/SP"
+}
+
+###############################################################################
+### 🔟 REGISTRAR HEPATITE B - 2ª DOSE
+###############################################################################
+### 📌 O quê: Registrar 2ª dose da Hepatite B
+### ✅ Resposta esperada: 201 Created
+### 🔐 Requer autenticação: Bearer {{tokenMaria}}
+### 💡 Hepatite B - 2ª Dose com 1 mês (esquemaVacinalId = 3)
+### 📅 Data: 05/02/2020 (1 mês após 1ª dose)
+###############################################################################
+POST {{baseUrl}}/api/v1/registros-vacina/registros
+Authorization: Bearer {{tokenMaria}}
+Content-Type: application/json
+
+{
+  "pessoaId": {{anaId}},
+  "esquemaVacinalId": 3,
+  "dataAplicacao": "2020-02-05",
+  "lote": "LOT-2020-HEPA-002",
+  "fabricante": "Instituto Butantan",
+  "vacinador": "Enfermeira Paula Lima",
+  "localAplicacao": "UBS Centro - São Paulo/SP"
+}
+
+###############################################################################
+### 1️⃣1️⃣ REGISTRAR HEPATITE B - 3ª DOSE
+###############################################################################
+### 📌 O quê: Registrar 3ª dose da Hepatite B
+### ✅ Resposta esperada: 201 Created
+### 🔐 Requer autenticação: Bearer {{tokenMaria}}
+### 💡 Hepatite B - 3ª Dose com 6 meses (esquemaVacinalId = 4)
+### 📅 Data: 05/07/2020 (6 meses após nascimento)
+### ⚠️ COMENTADO: Para visualizar no calendário como PENDENTE/ATRASADA
+###############################################################################
+# POST {{baseUrl}}/api/v1/registros-vacina/registros
+# Authorization: Bearer {{tokenMaria}}
+# Content-Type: application/json
+
+# {
+#   "pessoaId": {{anaId}},
+#   "esquemaVacinalId": 4,
+#   "dataAplicacao": "2020-07-05",
+#   "lote": "LOT-2020-HEPA-003",
+#   "fabricante": "Instituto Butantan",
+#   "vacinador": "Enfermeiro Roberto Alves",
+#   "localAplicacao": "UBS Centro - São Paulo/SP"
+# }
+
+###############################################################################
+### 1️⃣2️⃣ CONSULTAR ESQUEMAS VACINAIS - PENTAVALENTE (MÚLTIPLAS DOSES)
+###############################################################################
+### 📌 O quê: Obter doses da vacina Pentavalente (ID 3)
+### ✅ Resposta esperada: 200 OK com 3 doses
+### 🔐 Requer autenticação: Bearer {{tokenMaria}}
+### 💡 Pentavalente: 2, 4 e 6 meses
+###############################################################################
+GET {{baseUrl}}/api/v1/vacinas/3/esquema
+Authorization: Bearer {{tokenMaria}}
+Content-Type: application/json
+
+###############################################################################
+### 1️⃣3️⃣ REGISTRAR PENTAVALENTE - 1ª DOSE
+###############################################################################
+### 📌 O quê: Registrar 1ª dose da Pentavalente
+### ✅ Resposta esperada: 201 Created
+### 🔐 Requer autenticação: Bearer {{tokenMaria}}
+### 💡 Pentavalente - 1ª Dose aos 2 meses (esquemaVacinalId = 5)
+### 📅 Data: 05/03/2020 (2 meses)
+###############################################################################
+POST {{baseUrl}}/api/v1/registros-vacina/registros
+Authorization: Bearer {{tokenMaria}}
+Content-Type: application/json
+
+{
+  "pessoaId": {{anaId}},
+  "esquemaVacinalId": 5,
+  "dataAplicacao": "2020-03-05",
+  "lote": "LOT-2020-PENTA-001",
+  "fabricante": "Fiocruz",
+  "vacinador": "Enfermeira Ana Costa",
+  "localAplicacao": "UBS Centro - São Paulo/SP"
+}
+
+###############################################################################
+### 1️⃣4️⃣ REGISTRAR PENTAVALENTE - 2ª DOSE
+###############################################################################
+### 📌 O quê: Registrar 2ª dose da Pentavalente
+### ✅ Resposta esperada: 201 Created
+### 🔐 Requer autenticação: Bearer {{tokenMaria}}
+### 💡 Pentavalente - 2ª Dose aos 4 meses (esquemaVacinalId = 6)
+### 📅 Data: 05/05/2020 (4 meses)
+###############################################################################
+POST {{baseUrl}}/api/v1/registros-vacina/registros
+Authorization: Bearer {{tokenMaria}}
+Content-Type: application/json
+
+{
+  "pessoaId": {{anaId}},
+  "esquemaVacinalId": 6,
+  "dataAplicacao": "2020-05-05",
+  "lote": "LOT-2020-PENTA-002",
+  "fabricante": "Fiocruz",
+  "vacinador": "Enfermeiro Roberto Alves",
+  "localAplicacao": "UBS Centro - São Paulo/SP"
+}
+
+###############################################################################
+### 1️⃣5️⃣ REGISTRAR PENTAVALENTE - 3ª DOSE (COMPLETA O CICLO)
+###############################################################################
+### 📌 O quê: Registrar 3ª dose da Pentavalente
+### ✅ Resposta esperada: 201 Created
+### 🔐 Requer autenticação: Bearer {{tokenMaria}}
+### 💡 Pentavalente - 3ª Dose aos 6 meses (esquemaVacinalId = 7)
+### 📅 Data: 05/07/2020 (6 meses)
+### ⭐ Esta vacina completa o requisito de "terceira dose aplicada"
+###############################################################################
+POST {{baseUrl}}/api/v1/registros-vacina/registros
+Authorization: Bearer {{tokenMaria}}
+Content-Type: application/json
+
+{
+  "pessoaId": {{anaId}},
+  "esquemaVacinalId": 7,
+  "dataAplicacao": "2020-07-05",
+  "lote": "LOT-2020-PENTA-003",
+  "fabricante": "Fiocruz",
+  "vacinador": "Enfermeira Paula Lima",
+  "localAplicacao": "UBS Centro - São Paulo/SP"
+}
+
+###############################################################################
+### 1️⃣6️⃣ CONSULTAR ESQUEMAS VACINAIS - POLIOMIELITE (VIP/VOP)
+###############################################################################
+### 📌 O quê: Obter doses da vacina Poliomielite (ID 4)
+### ✅ Resposta esperada: 200 OK com múltiplas doses
+### 🔐 Requer autenticação: Bearer {{tokenMaria}}
+### 💡 Poliomielite: 2, 4, 6 meses (VIP) + reforços (VOP)
+###############################################################################
+GET {{baseUrl}}/api/v1/vacinas/4/esquema
+Authorization: Bearer {{tokenMaria}}
+Content-Type: application/json
+
+###############################################################################
+### 1️⃣7️⃣ REGISTRAR POLIOMIELITE VIP - 1ª DOSE
+###############################################################################
+### 📌 O quê: Registrar 1ª dose da Poliomielite (VIP)
+### ✅ Resposta esperada: 201 Created
+### 🔐 Requer autenticação: Bearer {{tokenMaria}}
+### 💡 Poliomielite VIP - 1ª Dose aos 2 meses (esquemaVacinalId = 8)
+### 📅 Data: 05/03/2020 (2 meses)
+###############################################################################
+POST {{baseUrl}}/api/v1/registros-vacina/registros
+Authorization: Bearer {{tokenMaria}}
+Content-Type: application/json
+
+{
+  "pessoaId": {{anaId}},
+  "esquemaVacinalId": 8,
+  "dataAplicacao": "2020-03-05",
+  "lote": "LOT-2020-VIP-001",
+  "fabricante": "Sanofi Pasteur",
+  "vacinador": "Enfermeira Ana Costa",
+  "localAplicacao": "UBS Centro - São Paulo/SP"
+}
+
+###############################################################################
+### 1️⃣8️⃣ REGISTRAR POLIOMIELITE VIP - 2ª DOSE
+###############################################################################
+### 📌 O quê: Registrar 2ª dose da Poliomielite (VIP)
+### ✅ Resposta esperada: 201 Created
+### 🔐 Requer autenticação: Bearer {{tokenMaria}}
+### 💡 Poliomielite VIP - 2ª Dose aos 4 meses (esquemaVacinalId = 9)
+### 📅 Data: 05/05/2020 (4 meses)
+###############################################################################
+POST {{baseUrl}}/api/v1/registros-vacina/registros
+Authorization: Bearer {{tokenMaria}}
+Content-Type: application/json
+
+{
+  "pessoaId": {{anaId}},
+  "esquemaVacinalId": 9,
+  "dataAplicacao": "2020-05-05",
+  "lote": "LOT-2020-VIP-002",
+  "fabricante": "Sanofi Pasteur",
+  "vacinador": "Enfermeiro Roberto Alves",
+  "localAplicacao": "UBS Centro - São Paulo/SP"
+}
+
+###############################################################################
+### 1️⃣9️⃣ REGISTRAR POLIOMIELITE VIP - 3ª DOSE
+###############################################################################
+### 📌 O quê: Registrar 3ª dose da Poliomielite (VIP)
+### ✅ Resposta esperada: 201 Created
+### 🔐 Requer autenticação: Bearer {{tokenMaria}}
+### 💡 Poliomielite VIP - 3ª Dose aos 6 meses (esquemaVacinalId = 10)
+### 📅 Data: 05/07/2020 (6 meses)
+### ⚠️ COMENTADO: Para visualizar no calendário como PENDENTE/ATRASADA
+###############################################################################
+# POST {{baseUrl}}/api/v1/registros-vacina/registros
+# Authorization: Bearer {{tokenMaria}}
+# Content-Type: application/json
+
+# {
+#   "pessoaId": {{anaId}},
+#   "esquemaVacinalId": 10,
+#   "dataAplicacao": "2020-07-05",
+#   "lote": "LOT-2020-VIP-003",
+#   "fabricante": "Sanofi Pasteur",
+#   "vacinador": "Enfermeira Paula Lima",
+#   "localAplicacao": "UBS Centro - São Paulo/SP"
+# }
+
+###############################################################################
+### 2️⃣0️⃣ REGISTRAR POLIOMIELITE VOP - 1º REFORÇO
+###############################################################################
+### 📌 O quê: Registrar 1º reforço da Poliomielite (VOP)
+### ✅ Resposta esperada: 201 Created
+### 🔐 Requer autenticação: Bearer {{tokenMaria}}
+### 💡 Poliomielite VOP - 1º Reforço aos 15 meses (esquemaVacinalId = 11)
+### 📅 Data: 05/04/2021 (15 meses)
+### ⚠️ COMENTADO: Para visualizar no calendário como PENDENTE/ATRASADA
+###############################################################################
+# POST {{baseUrl}}/api/v1/registros-vacina/registros
+# Authorization: Bearer {{tokenMaria}}
+# Content-Type: application/json
+
+# {
+#   "pessoaId": {{anaId}},
+#   "esquemaVacinalId": 11,
+#   "dataAplicacao": "2021-04-05",
+#   "lote": "LOT-2021-VOP-001",
+#   "fabricante": "Instituto Butantan",
+#   "vacinador": "Enfermeira Juliana Oliveira",
+#   "localAplicacao": "UBS Centro - São Paulo/SP"
+# }
+
+###############################################################################
+### 2️⃣1️⃣ CONSULTAR ESQUEMAS VACINAIS - MENINGOCÓCICA C (MÚLTIPLAS DOSES)
+###############################################################################
+### 📌 O quê: Obter doses da vacina Meningocócica C (ID 6)
+### ✅ Resposta esperada: 200 OK com múltiplas doses
+### 🔐 Requer autenticação: Bearer {{tokenMaria}}
+### 💡 Meningocócica C: 3, 5 meses + reforço 12 meses
+###############################################################################
+GET {{baseUrl}}/api/v1/vacinas/6/esquema
+Authorization: Bearer {{tokenMaria}}
+Content-Type: application/json
+
+###############################################################################
+### 2️⃣2️⃣ REGISTRAR MENINGOCÓCICA C - 1ª DOSE
+###############################################################################
+### 📌 O quê: Registrar 1ª dose da Meningocócica C
+### ✅ Resposta esperada: 201 Created
+### 🔐 Requer autenticação: Bearer {{tokenMaria}}
+### 💡 Meningocócica C - 1ª Dose aos 3 meses (esquemaVacinalId = 16)
+### 📅 Data: 05/04/2020 (3 meses)
+###############################################################################
+POST {{baseUrl}}/api/v1/registros-vacina/registros
+Authorization: Bearer {{tokenMaria}}
+Content-Type: application/json
+
+{
+  "pessoaId": {{anaId}},
+  "esquemaVacinalId": 16,
+  "dataAplicacao": "2020-04-05",
+  "lote": "LOT-2020-MENC-001",
+  "fabricante": "GSK",
+  "vacinador": "Enfermeira Beatriz Santos",
+  "localAplicacao": "UBS Centro - São Paulo/SP"
+}
+
+###############################################################################
+### 2️⃣3️⃣ REGISTRAR MENINGOCÓCICA C - 2ª DOSE
+###############################################################################
+### 📌 O quê: Registrar 2ª dose da Meningocócica C
+### ✅ Resposta esperada: 201 Created
+### 🔐 Requer autenticação: Bearer {{tokenMaria}}
+### 💡 Meningocócica C - 2ª Dose aos 5 meses (esquemaVacinalId = 17)
+### 📅 Data: 05/06/2020 (5 meses)
+###############################################################################
+POST {{baseUrl}}/api/v1/registros-vacina/registros
+Authorization: Bearer {{tokenMaria}}
+Content-Type: application/json
+
+{
+  "pessoaId": {{anaId}},
+  "esquemaVacinalId": 17,
+  "dataAplicacao": "2020-06-05",
+  "lote": "LOT-2020-MENC-002",
+  "fabricante": "GSK",
+  "vacinador": "Enfermeiro Carlos Ferreira",
+  "localAplicacao": "UBS Centro - São Paulo/SP"
+}
+
+###############################################################################
+### 2️⃣4️⃣ RESUMO DAS VACINAS REGISTRADAS PARA ANA
+###############################################################################
+### ✅ 5 TIPOS DE VACINAS CADASTRADAS:
+###
+### 1. BCG (Dose única)
+###    └─ ✅ Dose única - 05/01/2020
+###
+### 2. HEPATITE B (Múltiplas doses - 3 doses completas)
+###    ├─ ✅ 1ª Dose - 05/01/2020
+###    ├─ ✅ 2ª Dose - 05/02/2020
+###    └─ ✅ 3ª Dose - 05/07/2020
+###
+### 3. PENTAVALENTE (Múltiplas doses - 3ª dose aplicada) ⭐
+###    ├─ ✅ 1ª Dose - 05/03/2020
+###    ├─ ✅ 2ª Dose - 05/05/2020
+###    └─ ✅ 3ª Dose - 05/07/2020
+###
+### 4. POLIOMIELITE (Múltiplas doses + reforço) ⭐
+###    ├─ ✅ VIP 1ª Dose - 05/03/2020
+###    ├─ ✅ VIP 2ª Dose - 05/05/2020
+###    ├─ ✅ VIP 3ª Dose - 05/07/2020
+###    └─ ✅ VOP 1º Reforço - 05/04/2021
+###
+### 5. MENINGOCÓCICA C (Múltiplas doses)
+###    ├─ ✅ 1ª Dose - 05/04/2020
+###    └─ ✅ 2ª Dose - 05/06/2020
+###
+###############################################################################
+
+###############################################################################
+### 2️⃣5️⃣ LOGIN COM JOÃO
+###############################################################################
+### 📌 O quê: Autenticar João e obter token JWT
+### ✅ Resposta esperada: 200 OK com token
+### 🔓 Não requer autenticação (login é público)
+### 💡 Token será usado em @tokenJoao
+### 📋 Próximo passo: Vincular Ana ao cadastro de João
+###############################################################################
+# @name loginJoao
+POST {{baseUrl}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "joao.santos@email.com",
+  "senha": "Senha@123"
+}
+
+###############################################################################
+### 2️⃣6️⃣ BUSCAR PESSOA POR CPF E CNS (JOÃO PROCURA ANA)
+###############################################################################
+### 📌 O quê: João busca Ana por CPF e CNS para vincular ao seu cadastro
+### ✅ Resposta esperada: 200 OK com dados de Ana
+### 🔐 Requer autenticação: Bearer {{tokenJoao}}
+### 💡 Retorna dados da pessoa para confirmação antes do vínculo
+### 📋 Próximo passo: Vincular Ana como dependente de João
+###############################################################################
+GET {{baseUrl}}/api/v1/pessoas/buscar
+  ?cpf=12345678901
+  &cns=898001160000000
+Authorization: Bearer {{tokenJoao}}
+Content-Type: application/json
+
+###############################################################################
+### 2️⃣7️⃣ VINCULAR ANA AO CADASTRO DE JOÃO
+###############################################################################
+### 📌 O quê: João vincula Ana (já existente) ao seu cadastro
+### ✅ Resposta esperada: 201 Created
+### 🔐 Requer autenticação: Bearer {{tokenJoao}}
+### 💡 Ana já existe no sistema (cadastrada por Maria)
+### 💡 Agora Ana terá 2 responsáveis: Maria e João
+### 📋 Próximo passo: João adicionar alergias para Ana
+###############################################################################
+POST {{baseUrl}}/api/v1/responsaveis
+Authorization: Bearer {{tokenJoao}}
+Content-Type: application/json
+
+{
+  "pessoaId": {{anaId}},
+  "tipoRelacao": "FILHA"
+}
+
+###############################################################################
+### 2️⃣8️⃣ LISTAR TODAS AS ALERGIAS DISPONÍVEIS
+###############################################################################
+### 📌 O quê: Consultar catálogo completo de alergias cadastradas
+### ✅ Resposta esperada: 200 OK com lista de alergias
+### 🔐 Requer autenticação: Bearer {{tokenJoao}}
+### 💡 Use esta lista para identificar IDs das alergias
+### 📋 Próximo passo: Adicionar alergias para Ana
+###############################################################################
+GET {{baseUrl}}/api/v1/alergias
+Authorization: Bearer {{tokenJoao}}
+Content-Type: application/json
+
+###############################################################################
+### 2️⃣9️⃣ ADICIONAR 1ª ALERGIA PARA ANA - PENICILINA
+###############################################################################
+### 📌 O quê: João registra alergia de Ana à Penicilina
+### ✅ Resposta esperada: 201 Created
+### 🔐 Requer autenticação: Bearer {{tokenJoao}}
+### 💡 Penicilina - Medicamento (alergiaId = 1)
+### 📝 Inclui observação médica detalhada
+###############################################################################
+POST {{baseUrl}}/api/v1/pessoas/{{anaId}}/alergias
+Authorization: Bearer {{tokenJoao}}
+Content-Type: application/json
+
+{
+  "alergiaId": 1,
+  "severidade": "GRAVE",
+  "dataIdentificacao": "2022-03-15",
+  "observacao": "Anafilaxia após administração de amoxicilina. Evitar todos os antibióticos da classe das penicilinas. Sempre ter epinefrina disponível."
+}
+
+###############################################################################
+### 3️⃣0️⃣ ADICIONAR 2ª ALERGIA PARA ANA - CAMARÃO
+###############################################################################
+### 📌 O quê: João registra alergia de Ana a Camarão
+### ✅ Resposta esperada: 201 Created
+### 🔐 Requer autenticação: Bearer {{tokenJoao}}
+### 💡 Camarão - Alimento (alergiaId pode variar, verificar catálogo)
+### 📝 Inclui observação sobre reações
+###############################################################################
+POST {{baseUrl}}/api/v1/pessoas/{{anaId}}/alergias
+Authorization: Bearer {{tokenJoao}}
+Content-Type: application/json
+
+{
+  "alergiaId": 10,
+  "severidade": "MODERADA",
+  "dataIdentificacao": "2023-08-20",
+  "observacao": "Reação alérgica com urticária e coceira após ingestão de camarão. Evitar frutos do mar em geral."
+}
+
+###############################################################################
+### 3️⃣1️⃣ ADICIONAR 3ª ALERGIA PARA ANA - PÓLEN
+###############################################################################
+### 📌 O quê: João registra alergia de Ana a Pólen
+### ✅ Resposta esperada: 201 Created
+### 🔐 Requer autenticação: Bearer {{tokenJoao}}
+### 💡 Pólen - Ambiental (alergiaId pode variar, verificar catálogo)
+### 📝 Inclui observação sobre sazonalidade
+###############################################################################
+POST {{baseUrl}}/api/v1/pessoas/{{anaId}}/alergias
+Authorization: Bearer {{tokenJoao}}
+Content-Type: application/json
+
+{
+  "alergiaId": 15,
+  "severidade": "LEVE",
+  "dataIdentificacao": "2024-04-10",
+  "observacao": "Rinite alérgica sazonal. Sintomas: espirros, coriza e coceira nos olhos. Mais intensa na primavera."
+}
+
+###############################################################################
+### 3️⃣2️⃣ JOÃO CONSULTA HISTÓRICO DE VACINAS DE ANA
+###############################################################################
+### 📌 O quê: João visualiza todas as vacinas aplicadas em Ana
+### ✅ Resposta esperada: 200 OK com lista de vacinas aplicadas
+### 🔐 Requer autenticação: Bearer {{tokenJoao}}
+### 💡 Mostra apenas doses com status APLICADA
+### 💡 João pode ver mesmo sendo Maria quem registrou (ambos são responsáveis)
+### 📄 Use para gerar comprovante de vacinação
+###############################################################################
+GET {{baseUrl}}/api/v1/registros-vacina/pessoas/{{anaId}}/historico
+Authorization: Bearer {{tokenJoao}}
+Content-Type: application/json
+
+###############################################################################
+### 3️⃣3️⃣ MARIA CONSULTA ALERGIAS DE ANA
+###############################################################################
+### 📌 O quê: Maria visualiza todas as alergias registradas para Ana
+### ✅ Resposta esperada: 200 OK com lista de alergias
+### 🔐 Requer autenticação: Bearer {{tokenMaria}}
+### 💡 Maria pode ver alergias cadastradas por João (ambos são responsáveis)
+### 📋 Deve retornar 3 alergias: Penicilina, Camarão e Pólen
+###############################################################################
+GET {{baseUrl}}/api/v1/pessoas/{{anaId}}/alergias
+Authorization: Bearer {{tokenMaria}}
+Content-Type: application/json
+
+###############################################################################
+### 3️⃣4️⃣ VERIFICAR CALENDÁRIO VACINAL COMPLETO DE ANA
+###############################################################################
+### 📌 O quê: Visualizar calendário completo (aplicadas + pendentes + atrasadas)
+### ✅ Resposta esperada: 200 OK com todas as doses previstas do PNI
+### 🔐 Requer autenticação: Bearer {{tokenMaria}}
+### 💡 Mostra status de cada dose:
+###    ├─ APLICADA: doses já registradas
+###    ├─ PENDENTE: doses não aplicadas, dentro do prazo
+###    └─ ATRASADA: doses não aplicadas, fora do prazo
+### 📊 Ana tem 6 anos, várias doses podem estar atrasadas
+###############################################################################
+GET {{baseUrl}}/api/v1/registros-vacina/pessoas/{{anaId}}/calendario
+Authorization: Bearer {{tokenMaria}}
+Content-Type: application/json
+
+###############################################################################
+### 📊 RESUMO DO TESTE DE VALIDAÇÃO
+###############################################################################
+###
+### ✅ USUÁRIOS CRIADOS:
+###    ├─ Maria da Silva (maria.silva@email.com)
+###    └─ João Santos (joao.santos@email.com)
+###
+### ✅ PESSOA CADASTRADA:
+###    └─ Ana Silva Santos (filha, nascida 01/01/2020)
+###       ├─ CPF: 12345678901
+###       ├─ CNS: 898001160000000
+###       └─ Responsáveis: Maria (cadastrou) + João (vinculado)
+###
+### ✅ 5 TIPOS DE VACINAS REGISTRADAS (por Maria):
+###    1. BCG (dose única)                        ✓
+###    2. Hepatite B (3 doses completas)          ✓
+###    3. Pentavalente (3 doses completas)        ✓
+###    4. Poliomielite (3 doses + 1 reforço)      ✓
+###    5. Meningocócica C (2 doses)               ✓
+###
+### ✅ 3 ALERGIAS REGISTRADAS (por João):
+###    1. Penicilina (medicamento - grave)        ✓
+###    2. Camarão (alimento - moderada)           ✓
+###    3. Pólen (ambiental - leve)                ✓
+###
+### ✅ CONSULTAS REALIZADAS:
+###    ├─ João: histórico de vacinas de Ana       ✓
+###    └─ Maria: alergias de Ana                  ✓
+###
+### 💡 VALIDAÇÕES TESTADAS:
+###    ├─ Vínculo de responsabilidade compartilhada
+###    ├─ Acesso cruzado aos dados da pessoa
+###    ├─ Hierarquia de doses respeitada
+###    ├─ Calendário vacinal personalizado
+###    └─ Gestão multi-responsável de dependentes
+###
+###############################################################################

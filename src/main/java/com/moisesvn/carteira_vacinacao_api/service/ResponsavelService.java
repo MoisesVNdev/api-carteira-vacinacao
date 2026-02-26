@@ -55,10 +55,8 @@ public class ResponsavelService {
     }
 
     /**
-     * Cria um vínculo de responsável manualmente.
-     * 
-     * NOTA: Este método é mantido para uso interno, mas o endpoint público POST
-     * foi removido. A criação normal de responsáveis é automática via PessoaService.
+     * Cria um vínculo de responsável manualmente com usuarioId explícito.
+     * Uso interno apenas.
      */
     @Transactional
     ResponsavelResponseDTO create(ResponsavelRequestDTO dto) {
@@ -82,6 +80,59 @@ public class ResponsavelService {
                 .build();
 
         Responsavel salvo = responsavelRepository.save(r);
+        return ResponsavelMapper.toResponseDto(salvo);
+    }
+
+    /**
+     * Cria um novo vínculo de responsável para uma pessoa já existente.
+     * O usuário responsável é extraído do JWT (SecurityContext).
+     * 
+     * Caso de uso: Vincular uma pessoa já cadastrada a outro responsável.
+     * Exemplo: João quer adicionar sua filha Ana (já cadastrada por Maria) ao seu cadastro.
+     * 
+     * @param dto Dados de criação (pessoaId e tipoRelacao)
+     * @return DTO com os dados do responsável criado
+     * @throws UsuarioNaoEncontradoException se o usuário autenticado não for encontrado
+     * @throws PessoaNaoEncontradaException se a pessoa não for encontrada
+     * @throws ResponsavelJaCadastradoException se o vínculo já existir
+     */
+    @Transactional
+    public ResponsavelResponseDTO criarVinculoExistente(com.moisesvn.carteira_vacinacao_api.dto.request.ResponsavelCreateRequestDTO dto) {
+        log.info("Criando vínculo de responsável para pessoa ID: {}, tipo: {}", dto.pessoaId(), dto.tipoRelacao());
+        
+        // 1. Extrair usuário do SecurityContext (JWT)
+        String emailAutenticado = org.springframework.security.core.context.SecurityContextHolder.getContext()
+            .getAuthentication()
+            .getName();
+        
+        Usuario usuario = usuarioRepository.findByEmail(emailAutenticado)
+            .orElseThrow(() -> new UsuarioNaoEncontradoException("Usuário autenticado não encontrado"));
+        
+        log.debug("Usuário autenticado: {} (ID: {})", emailAutenticado, usuario.getId());
+        
+        // 2. Validar pessoa existe
+        Pessoa pessoa = pessoaRepository.findById(dto.pessoaId())
+            .orElseThrow(() -> new PessoaNaoEncontradaException(dto.pessoaId()));
+        
+        // 3. Verificar se vínculo já existe
+        if (responsavelRepository.existsByUsuarioIdAndPessoaId(usuario.getId(), dto.pessoaId())) {
+            log.warn("Tentativa de criar vínculo duplicado. Usuario ID: {}, Pessoa ID: {}", 
+                usuario.getId(), dto.pessoaId());
+            throw new ResponsavelJaCadastradoException(usuario.getId(), dto.pessoaId());
+        }
+        
+        // 4. Criar e persistir vínculo
+        Responsavel responsavel = Responsavel.builder()
+            .usuario(usuario)
+            .pessoa(pessoa)
+            .tipoRelacao(dto.tipoRelacao())
+            .build();
+        
+        Responsavel salvo = responsavelRepository.save(responsavel);
+        
+        log.info("Vínculo de responsável criado com sucesso. ID: {}, Usuario ID: {}, Pessoa ID: {}", 
+            salvo.getId(), usuario.getId(), pessoa.getId());
+        
         return ResponsavelMapper.toResponseDto(salvo);
     }
 

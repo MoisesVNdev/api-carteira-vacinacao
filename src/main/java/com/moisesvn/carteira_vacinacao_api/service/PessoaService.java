@@ -84,6 +84,23 @@ public class PessoaService {
         return PessoaMapper.toResponseDto(pessoa);
     }
 
+    /**
+     * Busca uma pessoa por CPF e CNS.
+     * 
+     * @param cpf CPF da pessoa
+     * @param cns CNS da pessoa
+     * @return DTO com os dados da pessoa encontrada
+     * @throws PessoaNaoEncontradaException se nenhuma pessoa for encontrada
+     */
+    public PessoaResponseDTO findByCpfAndCns(String cpf, String cns) {
+        log.info("Buscando pessoa por CPF: {} e CNS: {}", cpf, cns);
+        Pessoa pessoa = pessoaRepository.findByCpfAndCns(cpf, cns)
+            .orElseThrow(() -> new PessoaNaoEncontradaException(
+                "Pessoa com CPF " + cpf + " e CNS " + cns + " não encontrada"
+            ));
+        return PessoaMapper.toResponseDto(pessoa);
+    }
+
     public List<PessoaResponseDTO> findAll() {
         return pessoaRepository.findAll().stream()
             .map(PessoaMapper::toResponseDto)

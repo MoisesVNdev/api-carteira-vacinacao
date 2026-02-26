@@ -94,6 +94,8 @@ public class PessoaAlergiaService {
                 .build();
         
         PessoaAlergia saved = pessoaAlergiaRepository.save(pessoaAlergia);
+        pessoaAlergiaRepository.flush(); // Força flush para popular @CreationTimestamp
+        
         log.info("Alergia vinculada com sucesso. Pessoa ID: {}, Alergia ID: {}", pessoaId, alergia.getId());
         
         return PessoaAlergiaMapper.toResponseDto(saved);
@@ -143,6 +145,8 @@ public class PessoaAlergiaService {
                 .collect(Collectors.toList());
         
         List<PessoaAlergia> savedItems = pessoaAlergiaRepository.saveAll(pessoasAlergias);
+        pessoaAlergiaRepository.flush(); // Força flush para popular @CreationTimestamp
+        
         log.info("Batch de {} alergias vinculadas com sucesso à pessoa ID {}", 
                  savedItems.size(), pessoaId);
         

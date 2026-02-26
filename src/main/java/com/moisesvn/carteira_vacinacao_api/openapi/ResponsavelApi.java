@@ -96,6 +96,64 @@ public interface ResponsavelApi {
     );
 
     @Operation(
+        summary = "Criar novo vínculo de responsável",
+        description = "Vincula uma pessoa já existente ao usuário autenticado como um novo responsável. "
+            + "Útil para vincular dependentes já cadastrados. O usuário é extraído automaticamente do JWT."
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "201", description = "Vínculo criado com sucesso.",
+            content = @Content(schema = @Schema(implementation = ResponsavelResponseDTO.class))),
+        @ApiResponse(responseCode = "400", description = "Dados inválidos.",
+            content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class),
+                examples = @ExampleObject(value = """
+                    {
+                      "timestamp": "2026-02-25T20:35:00",
+                      "status": 400,
+                      "erro": "MethodArgumentNotValidException",
+                      "mensagem": "pessoaId: ID da pessoa é obrigatório",
+                      "caminho": "/api/v1/responsaveis"
+                    }
+                    """))),
+        @ApiResponse(responseCode = "401", description = "Token ausente ou inválido.",
+            content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class),
+                examples = @ExampleObject(value = """
+                    {
+                      "timestamp": "2026-02-25T20:35:00",
+                      "status": 401,
+                      "erro": "TokenInvalidoException",
+                      "mensagem": "Token JWT inválido ou expirado",
+                      "caminho": "/api/v1/responsaveis"
+                    }
+                    """))),
+        @ApiResponse(responseCode = "404", description = "Pessoa não encontrada.",
+            content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class),
+                examples = @ExampleObject(value = """
+                    {
+                      "timestamp": "2026-02-25T20:35:00",
+                      "status": 404,
+                      "erro": "PessoaNaoEncontradaException",
+                      "mensagem": "Pessoa não encontrada com id: 999",
+                      "caminho": "/api/v1/responsaveis"
+                    }
+                    """))),
+        @ApiResponse(responseCode = "409", description = "Vínculo já existente.",
+            content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class),
+                examples = @ExampleObject(value = """
+                    {
+                      "timestamp": "2026-02-25T20:35:00",
+                      "status": 409,
+                      "erro": "ResponsavelJaCadastradoException",
+                      "mensagem": "Responsável já cadastrado para o usuário 1 e pessoa 2",
+                      "caminho": "/api/v1/responsaveis"
+                    }
+                    """)))
+    })
+    @PostMapping
+    ResponseEntity<ResponsavelResponseDTO> create(
+        @Valid @RequestBody com.moisesvn.carteira_vacinacao_api.dto.request.ResponsavelCreateRequestDTO dto
+    );
+
+    @Operation(
         summary = "Atualizar tipo de relação",
         description = "Atualiza parcialmente o tipo de relação (ex: PAI, MÃE, TUTOR) de um vínculo existente."
     )
@@ -111,7 +169,7 @@ public interface ResponsavelApi {
                       "status": 400,
                       "erro": "MethodArgumentNotValidException",
                       "mensagem": "tipoRelacao: Tipo de relação é obrigatório",
-                      "caminho": "/api/responsaveis/1"
+                      "caminho": "/api/v1/responsaveis/1"
                     }
                     """)
                 })),
@@ -124,7 +182,7 @@ public interface ResponsavelApi {
                       "status": 401,
                       "erro": "TokenInvalidoException",
                       "mensagem": "Token JWT inválido ou expirado",
-                      "caminho": "/api/responsaveis/1"
+                      "caminho": "/api/v1/responsaveis/1"
                     }
                     """)
                 })),
@@ -137,7 +195,7 @@ public interface ResponsavelApi {
                       "status": 404,
                       "erro": "ResponsavelNaoEncontradoException",
                       "mensagem": "Responsável com ID 1 não encontrado",
-                      "caminho": "/api/responsaveis/1"
+                      "caminho": "/api/v1/responsaveis/1"
                     }
                     """)
                 }))

@@ -13,4 +13,6 @@ public interface PessoaRepository extends JpaRepository<Pessoa, Long> {
 
     Optional<Pessoa> findByCpf(String cpf);
 
+    Optional<Pessoa> findByCpfAndCns(String cpf, String cns);
+
 }

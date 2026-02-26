@@ -200,4 +200,54 @@ public interface PessoaApi {
         @Parameter(description = "ID da pessoa.", required = true, example = "1")
         @PathVariable Long id
     );
+
+    @Operation(
+        summary = "Buscar pessoa por CPF e CNS",
+        description = "Retorna os dados de uma pessoa específica através da combinação de CPF e CNS. "
+            + "Útil para vincular uma pessoa existente a outro responsável."
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Pessoa encontrada.",
+            content = @Content(schema = @Schema(implementation = PessoaResponseDTO.class))),
+        @ApiResponse(responseCode = "400", description = "Parâmetros ausentes ou inválidos.",
+            content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class),
+                examples = @ExampleObject(value = """
+                    {
+                      "timestamp": "2026-02-25T20:30:00",
+                      "status": 400,
+                      "erro": "MissingServletRequestParameterException",
+                      "mensagem": "Parâmetro obrigatório 'cpf' não informado",
+                      "caminho": "/api/v1/pessoas/buscar"
+                    }
+                    """))),
+        @ApiResponse(responseCode = "401", description = "Token ausente ou inválido.",
+            content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class),
+                examples = @ExampleObject(value = """
+                    {
+                      "timestamp": "2026-02-25T20:30:00",
+                      "status": 401,
+                      "erro": "TokenInvalidoException",
+                      "mensagem": "Token JWT inválido ou expirado",
+                      "caminho": "/api/v1/pessoas/buscar"
+                    }
+                    """))),
+        @ApiResponse(responseCode = "404", description = "Pessoa não encontrada.",
+            content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class),
+                examples = @ExampleObject(value = """
+                    {
+                      "timestamp": "2026-02-25T20:30:00",
+                      "status": 404,
+                      "erro": "PessoaNaoEncontradaException",
+                      "mensagem": "Pessoa com CPF 12345678901 e CNS 898001160000000 não encontrada",
+                      "caminho": "/api/v1/pessoas/buscar"
+                    }
+                    """)))
+    })
+    @GetMapping("/buscar")
+    ResponseEntity<PessoaResponseDTO> findByCpfAndCns(
+        @Parameter(description = "CPF da pessoa (apenas números).", required = true, example = "12345678901")
+        @RequestParam String cpf,
+        @Parameter(description = "CNS da pessoa.", required = true, example = "898001160000000")
+        @RequestParam String cns
+    );
 }

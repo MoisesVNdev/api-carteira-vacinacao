@@ -54,4 +54,10 @@ public class PessoaController implements PessoaApi {
         pessoaService.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    @Override
+    public ResponseEntity<PessoaResponseDTO> findByCpfAndCns(String cpf, String cns) {
+        PessoaResponseDTO dto = pessoaService.findByCpfAndCns(cpf, cns);
+        return ResponseEntity.ok(dto);
+    }
 }

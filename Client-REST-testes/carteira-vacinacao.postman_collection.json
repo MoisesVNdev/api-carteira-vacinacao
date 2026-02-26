@@ -1,0 +1,1160 @@
+{
+  "info": {
+    "name": "Carteira de Vacinação API - Teste de Validação Completo",
+    "description": "Coleção completa de teste de validação da API Carteira de Vacinação.\n\n📝 CENÁRIO:\n1. Criar usuários João (pai) e Maria (mãe)\n2. Login com Maria → criar pessoa Ana (filha)\n3. Maria registra 5 tipos de vacinas para Ana\n4. Login com João → vincular Ana ao seu cadastro\n5. João adiciona 3 alergias para Ana\n6. João consulta histórico de vacinas de Ana\n7. Maria consulta alergias de Ana\n\n💡 Execute usando o Collection Runner para rodar todos os endpoints em sequência.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "tokenMaria",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "tokenJoao",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "anaId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "👤 Autenticação e Usuários",
+      "item": [
+        {
+          "name": "01 - Criar Usuária Maria (Mãe)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nomeCompleto\": \"Maria da Silva\",\n  \"email\": \"maria.silva@email.com\",\n  \"senha\": \"Senha@123\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "register"]
+            },
+            "description": "Registrar usuária Maria da Silva no sistema.\n✅ Resposta esperada: 201 Created\n🔓 Não requer autenticação"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "02 - Criar Usuário João (Pai)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nomeCompleto\": \"João Santos\",\n  \"email\": \"joao.santos@email.com\",\n  \"senha\": \"Senha@123\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "register"]
+            },
+            "description": "Registrar usuário João Santos no sistema.\n✅ Resposta esperada: 201 Created\n🔓 Não requer autenticação"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "03 - Login com Maria",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"maria.silva@email.com\",\n  \"senha\": \"Senha@123\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "login"]
+            },
+            "description": "Autenticar Maria e obter token JWT.\n✅ Resposta esperada: 200 OK com token\n💡 Token capturado automaticamente em {{tokenMaria}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Token capturado com sucesso\", function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.token).to.not.be.empty;",
+                  "    pm.collectionVariables.set(\"tokenMaria\", json.token);",
+                  "    console.log(\"✅ tokenMaria salvo:\", json.token.substring(0, 30) + \"...\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "25 - Login com João",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"joao.santos@email.com\",\n  \"senha\": \"Senha@123\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "login"]
+            },
+            "description": "Autenticar João e obter token JWT.\n✅ Resposta esperada: 200 OK com token\n💡 Token capturado automaticamente em {{tokenJoao}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Token capturado com sucesso\", function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.token).to.not.be.empty;",
+                  "    pm.collectionVariables.set(\"tokenJoao\", json.token);",
+                  "    console.log(\"✅ tokenJoao salvo:\", json.token.substring(0, 30) + \"...\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "👶 Cadastro de Pessoa",
+      "item": [
+        {
+          "name": "04 - Cadastrar Pessoa Ana (Filha de Maria)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{tokenMaria}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nomeCompleto\": \"Ana Silva Santos\",\n  \"dataNascimento\": \"2020-01-01\",\n  \"cns\": \"898001160000000\",\n  \"cpf\": \"12345678901\",\n  \"nomeMae\": \"Maria da Silva\",\n  \"genero\": \"FEMININO\",\n  \"nacionalidade\": \"Brasileira\",\n  \"naturalidade\": \"Sao Paulo\",\n  \"tipoSanguineo\": \"O+\",\n  \"foto\": \"https://exemplo.com/foto-ana.jpg\",\n  \"tipoRelacao\": \"FILHA\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/pessoas",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "pessoas"]
+            },
+            "description": "Maria cadastra sua filha Ana no sistema.\n✅ Resposta esperada: 201 Created\n🔐 Requer autenticação: Bearer {{tokenMaria}}\n💡 ID de Ana capturado automaticamente em {{anaId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"anaId capturado com sucesso\", function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.id).to.not.be.undefined;",
+                  "    pm.collectionVariables.set(\"anaId\", json.id);",
+                  "    console.log(\"✅ anaId salvo:\", json.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "💉 Vacinas - Catálogo e Esquemas",
+      "item": [
+        {
+          "name": "05 - Listar Vacinas do Catálogo PNI",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenMaria}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/vacinas",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "vacinas"]
+            },
+            "description": "Consultar catálogo completo de vacinas disponíveis.\n✅ Resposta esperada: 200 OK com lista de vacinas\n🔐 Requer autenticação: Bearer {{tokenMaria}}\n💡 Use esta lista para identificar IDs das vacinas"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "06 - Esquema Vacinal - BCG (ID 1)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenMaria}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/vacinas/1/esquema",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "vacinas", "1", "esquema"]
+            },
+            "description": "Obter doses da vacina BCG (ID 1).\n✅ Resposta esperada: 200 OK com 1 dose\n💡 BCG: dose única ao nascer"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "08 - Esquema Vacinal - Hepatite B (ID 2)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenMaria}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/vacinas/2/esquema",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "vacinas", "2", "esquema"]
+            },
+            "description": "Obter doses da vacina Hepatite B (ID 2).\n✅ Resposta esperada: 200 OK com 3 doses\n💡 Hepatite B: ao nascer, 1 mês, 6 meses"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "12 - Esquema Vacinal - Pentavalente (ID 3)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenMaria}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/vacinas/3/esquema",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "vacinas", "3", "esquema"]
+            },
+            "description": "Obter doses da vacina Pentavalente (ID 3).\n✅ Resposta esperada: 200 OK com 3 doses\n💡 Pentavalente: 2, 4 e 6 meses"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "16 - Esquema Vacinal - Poliomielite (ID 4)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenMaria}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/vacinas/4/esquema",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "vacinas", "4", "esquema"]
+            },
+            "description": "Obter doses da vacina Poliomielite (ID 4).\n✅ Resposta esperada: 200 OK com múltiplas doses\n💡 Poliomielite: 2, 4, 6 meses (VIP) + reforços (VOP)"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "21 - Esquema Vacinal - Meningocócica C (ID 6)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenMaria}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/vacinas/6/esquema",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "vacinas", "6", "esquema"]
+            },
+            "description": "Obter doses da vacina Meningocócica C (ID 6).\n✅ Resposta esperada: 200 OK com múltiplas doses\n💡 Meningocócica C: 3, 5 meses + reforço 12 meses"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "💉 Registros de Vacina - Maria registra para Ana",
+      "item": [
+        {
+          "name": "07 - Registrar BCG (Dose Única)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenMaria}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pessoaId\": {{anaId}},\n  \"esquemaVacinalId\": 1,\n  \"dataAplicacao\": \"2020-01-05\",\n  \"lote\": \"LOT-2020-BCG-001\",\n  \"fabricante\": \"Fundação Ataulpho de Paiva\",\n  \"vacinador\": \"Enfermeira Carla Mendes\",\n  \"localAplicacao\": \"Maternidade Santa Maria - São Paulo/SP\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/registros-vacina/registros",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "registros-vacina", "registros"]
+            },
+            "description": "Registrar dose única da BCG aplicada ao nascer.\n✅ Resposta esperada: 201 Created\n📅 Data: 05/01/2020 (4 dias após nascimento)\n💡 esquemaVacinalId = 1"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "09 - Registrar Hepatite B - 1ª Dose",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenMaria}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pessoaId\": {{anaId}},\n  \"esquemaVacinalId\": 2,\n  \"dataAplicacao\": \"2020-01-05\",\n  \"lote\": \"LOT-2020-HEPA-001\",\n  \"fabricante\": \"Instituto Butantan\",\n  \"vacinador\": \"Enfermeira Carla Mendes\",\n  \"localAplicacao\": \"Maternidade Santa Maria - São Paulo/SP\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/registros-vacina/registros",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "registros-vacina", "registros"]
+            },
+            "description": "Registrar 1ª dose da Hepatite B.\n✅ Resposta esperada: 201 Created\n📅 Data: 05/01/2020 (junto com BCG)\n💡 esquemaVacinalId = 2"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "10 - Registrar Hepatite B - 2ª Dose",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenMaria}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pessoaId\": {{anaId}},\n  \"esquemaVacinalId\": 3,\n  \"dataAplicacao\": \"2020-02-05\",\n  \"lote\": \"LOT-2020-HEPA-002\",\n  \"fabricante\": \"Instituto Butantan\",\n  \"vacinador\": \"Enfermeira Paula Lima\",\n  \"localAplicacao\": \"UBS Centro - São Paulo/SP\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/registros-vacina/registros",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "registros-vacina", "registros"]
+            },
+            "description": "Registrar 2ª dose da Hepatite B.\n✅ Resposta esperada: 201 Created\n📅 Data: 05/02/2020 (1 mês após 1ª dose)\n💡 esquemaVacinalId = 3"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "11 - Registrar Hepatite B - 3ª Dose [COMENTADO NO ORIGINAL]",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenMaria}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pessoaId\": {{anaId}},\n  \"esquemaVacinalId\": 4,\n  \"dataAplicacao\": \"2020-07-05\",\n  \"lote\": \"LOT-2020-HEPA-003\",\n  \"fabricante\": \"Instituto Butantan\",\n  \"vacinador\": \"Enfermeiro Roberto Alves\",\n  \"localAplicacao\": \"UBS Centro - São Paulo/SP\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/registros-vacina/registros",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "registros-vacina", "registros"]
+            },
+            "description": "⚠️ ESTA REQUEST ESTAVA COMENTADA NO ARQUIVO ORIGINAL.\nDeixada assim para que a dose apareça como PENDENTE/ATRASADA no calendário.\nDesabilite esta request para manter o comportamento original.\n\nRegistrar 3ª dose da Hepatite B.\n📅 Data: 05/07/2020 (6 meses após nascimento)\n💡 esquemaVacinalId = 4"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "13 - Registrar Pentavalente - 1ª Dose",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenMaria}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pessoaId\": {{anaId}},\n  \"esquemaVacinalId\": 5,\n  \"dataAplicacao\": \"2020-03-05\",\n  \"lote\": \"LOT-2020-PENTA-001\",\n  \"fabricante\": \"Fiocruz\",\n  \"vacinador\": \"Enfermeira Ana Costa\",\n  \"localAplicacao\": \"UBS Centro - São Paulo/SP\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/registros-vacina/registros",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "registros-vacina", "registros"]
+            },
+            "description": "Registrar 1ª dose da Pentavalente.\n✅ Resposta esperada: 201 Created\n📅 Data: 05/03/2020 (2 meses)\n💡 esquemaVacinalId = 5"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "14 - Registrar Pentavalente - 2ª Dose",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenMaria}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pessoaId\": {{anaId}},\n  \"esquemaVacinalId\": 6,\n  \"dataAplicacao\": \"2020-05-05\",\n  \"lote\": \"LOT-2020-PENTA-002\",\n  \"fabricante\": \"Fiocruz\",\n  \"vacinador\": \"Enfermeiro Roberto Alves\",\n  \"localAplicacao\": \"UBS Centro - São Paulo/SP\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/registros-vacina/registros",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "registros-vacina", "registros"]
+            },
+            "description": "Registrar 2ª dose da Pentavalente.\n✅ Resposta esperada: 201 Created\n📅 Data: 05/05/2020 (4 meses)\n💡 esquemaVacinalId = 6"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "15 - Registrar Pentavalente - 3ª Dose ⭐",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenMaria}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pessoaId\": {{anaId}},\n  \"esquemaVacinalId\": 7,\n  \"dataAplicacao\": \"2020-07-05\",\n  \"lote\": \"LOT-2020-PENTA-003\",\n  \"fabricante\": \"Fiocruz\",\n  \"vacinador\": \"Enfermeira Paula Lima\",\n  \"localAplicacao\": \"UBS Centro - São Paulo/SP\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/registros-vacina/registros",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "registros-vacina", "registros"]
+            },
+            "description": "Registrar 3ª dose da Pentavalente - completa o ciclo.\n✅ Resposta esperada: 201 Created\n📅 Data: 05/07/2020 (6 meses)\n💡 esquemaVacinalId = 7\n⭐ Esta vacina completa o requisito de terceira dose aplicada"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "17 - Registrar Poliomielite VIP - 1ª Dose",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenMaria}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pessoaId\": {{anaId}},\n  \"esquemaVacinalId\": 8,\n  \"dataAplicacao\": \"2020-03-05\",\n  \"lote\": \"LOT-2020-VIP-001\",\n  \"fabricante\": \"Sanofi Pasteur\",\n  \"vacinador\": \"Enfermeira Ana Costa\",\n  \"localAplicacao\": \"UBS Centro - São Paulo/SP\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/registros-vacina/registros",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "registros-vacina", "registros"]
+            },
+            "description": "Registrar 1ª dose da Poliomielite VIP.\n✅ Resposta esperada: 201 Created\n📅 Data: 05/03/2020 (2 meses)\n💡 esquemaVacinalId = 8"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "18 - Registrar Poliomielite VIP - 2ª Dose",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenMaria}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pessoaId\": {{anaId}},\n  \"esquemaVacinalId\": 9,\n  \"dataAplicacao\": \"2020-05-05\",\n  \"lote\": \"LOT-2020-VIP-002\",\n  \"fabricante\": \"Sanofi Pasteur\",\n  \"vacinador\": \"Enfermeiro Roberto Alves\",\n  \"localAplicacao\": \"UBS Centro - São Paulo/SP\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/registros-vacina/registros",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "registros-vacina", "registros"]
+            },
+            "description": "Registrar 2ª dose da Poliomielite VIP.\n✅ Resposta esperada: 201 Created\n📅 Data: 05/05/2020 (4 meses)\n💡 esquemaVacinalId = 9"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "19 - Registrar Poliomielite VIP - 3ª Dose [COMENTADO NO ORIGINAL]",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenMaria}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pessoaId\": {{anaId}},\n  \"esquemaVacinalId\": 10,\n  \"dataAplicacao\": \"2020-07-05\",\n  \"lote\": \"LOT-2020-VIP-003\",\n  \"fabricante\": \"Sanofi Pasteur\",\n  \"vacinador\": \"Enfermeira Paula Lima\",\n  \"localAplicacao\": \"UBS Centro - São Paulo/SP\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/registros-vacina/registros",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "registros-vacina", "registros"]
+            },
+            "description": "⚠️ ESTA REQUEST ESTAVA COMENTADA NO ARQUIVO ORIGINAL.\nDeixada assim para que a dose apareça como PENDENTE/ATRASADA no calendário.\nDesabilite esta request para manter o comportamento original.\n\nRegistrar 3ª dose da Poliomielite VIP.\n📅 Data: 05/07/2020 (6 meses)\n💡 esquemaVacinalId = 10"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "20 - Registrar Poliomielite VOP - 1º Reforço [COMENTADO NO ORIGINAL]",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenMaria}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pessoaId\": {{anaId}},\n  \"esquemaVacinalId\": 11,\n  \"dataAplicacao\": \"2021-04-05\",\n  \"lote\": \"LOT-2021-VOP-001\",\n  \"fabricante\": \"Instituto Butantan\",\n  \"vacinador\": \"Enfermeira Juliana Oliveira\",\n  \"localAplicacao\": \"UBS Centro - São Paulo/SP\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/registros-vacina/registros",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "registros-vacina", "registros"]
+            },
+            "description": "⚠️ ESTA REQUEST ESTAVA COMENTADA NO ARQUIVO ORIGINAL.\nDeixada assim para que a dose apareça como PENDENTE/ATRASADA no calendário.\nDesabilite esta request para manter o comportamento original.\n\nRegistrar 1º reforço da Poliomielite VOP.\n📅 Data: 05/04/2021 (15 meses)\n💡 esquemaVacinalId = 11"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "22 - Registrar Meningocócica C - 1ª Dose",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenMaria}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pessoaId\": {{anaId}},\n  \"esquemaVacinalId\": 16,\n  \"dataAplicacao\": \"2020-04-05\",\n  \"lote\": \"LOT-2020-MENC-001\",\n  \"fabricante\": \"GSK\",\n  \"vacinador\": \"Enfermeira Beatriz Santos\",\n  \"localAplicacao\": \"UBS Centro - São Paulo/SP\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/registros-vacina/registros",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "registros-vacina", "registros"]
+            },
+            "description": "Registrar 1ª dose da Meningocócica C.\n✅ Resposta esperada: 201 Created\n📅 Data: 05/04/2020 (3 meses)\n💡 esquemaVacinalId = 16"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "23 - Registrar Meningocócica C - 2ª Dose",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenMaria}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pessoaId\": {{anaId}},\n  \"esquemaVacinalId\": 17,\n  \"dataAplicacao\": \"2020-06-05\",\n  \"lote\": \"LOT-2020-MENC-002\",\n  \"fabricante\": \"GSK\",\n  \"vacinador\": \"Enfermeiro Carlos Ferreira\",\n  \"localAplicacao\": \"UBS Centro - São Paulo/SP\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/registros-vacina/registros",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "registros-vacina", "registros"]
+            },
+            "description": "Registrar 2ª dose da Meningocócica C.\n✅ Resposta esperada: 201 Created\n📅 Data: 05/06/2020 (5 meses)\n💡 esquemaVacinalId = 17"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "🔗 Responsáveis e Vínculos",
+      "item": [
+        {
+          "name": "26 - Buscar Ana por CPF e CNS (João procura Ana)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenJoao}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/pessoas/buscar?cpf=12345678901&cns=898001160000000",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "pessoas", "buscar"],
+              "query": [
+                { "key": "cpf", "value": "12345678901" },
+                { "key": "cns", "value": "898001160000000" }
+              ]
+            },
+            "description": "João busca Ana por CPF e CNS para vincular ao seu cadastro.\n✅ Resposta esperada: 200 OK com dados de Ana\n🔐 Requer autenticação: Bearer {{tokenJoao}}\n💡 Retorna dados da pessoa para confirmação antes do vínculo"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "27 - Vincular Ana ao Cadastro de João",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenJoao}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pessoaId\": {{anaId}},\n  \"tipoRelacao\": \"FILHA\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/responsaveis",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "responsaveis"]
+            },
+            "description": "João vincula Ana (já existente) ao seu cadastro.\n✅ Resposta esperada: 201 Created\n🔐 Requer autenticação: Bearer {{tokenJoao}}\n💡 Ana já existe no sistema (cadastrada por Maria)\n💡 Agora Ana terá 2 responsáveis: Maria e João"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "🤧 Alergias",
+      "item": [
+        {
+          "name": "28 - Listar Todas as Alergias Disponíveis",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenJoao}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/alergias",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "alergias"]
+            },
+            "description": "Consultar catálogo completo de alergias cadastradas.\n✅ Resposta esperada: 200 OK com lista de alergias\n🔐 Requer autenticação: Bearer {{tokenJoao}}\n💡 Use esta lista para identificar IDs das alergias"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "29 - Adicionar Alergia de Ana - Penicilina (Grave)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenJoao}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"alergiaId\": 1,\n  \"severidade\": \"GRAVE\",\n  \"dataIdentificacao\": \"2022-03-15\",\n  \"observacao\": \"Anafilaxia após administração de amoxicilina. Evitar todos os antibióticos da classe das penicilinas. Sempre ter epinefrina disponível.\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/pessoas/{{anaId}}/alergias",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "pessoas", "{{anaId}}", "alergias"]
+            },
+            "description": "João registra alergia de Ana à Penicilina.\n✅ Resposta esperada: 201 Created\n🔐 Requer autenticação: Bearer {{tokenJoao}}\n💡 Penicilina - Medicamento (alergiaId = 1)\n📝 Severidade: GRAVE"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "30 - Adicionar Alergia de Ana - Camarão (Moderada)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenJoao}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"alergiaId\": 10,\n  \"severidade\": \"MODERADA\",\n  \"dataIdentificacao\": \"2023-08-20\",\n  \"observacao\": \"Reação alérgica com urticária e coceira após ingestão de camarão. Evitar frutos do mar em geral.\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/pessoas/{{anaId}}/alergias",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "pessoas", "{{anaId}}", "alergias"]
+            },
+            "description": "João registra alergia de Ana a Camarão.\n✅ Resposta esperada: 201 Created\n🔐 Requer autenticação: Bearer {{tokenJoao}}\n💡 Camarão - Alimento (alergiaId = 10)\n📝 Severidade: MODERADA"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "31 - Adicionar Alergia de Ana - Pólen (Leve)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenJoao}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"alergiaId\": 15,\n  \"severidade\": \"LEVE\",\n  \"dataIdentificacao\": \"2024-04-10\",\n  \"observacao\": \"Rinite alérgica sazonal. Sintomas: espirros, coriza e coceira nos olhos. Mais intensa na primavera.\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/pessoas/{{anaId}}/alergias",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "pessoas", "{{anaId}}", "alergias"]
+            },
+            "description": "João registra alergia de Ana a Pólen.\n✅ Resposta esperada: 201 Created\n🔐 Requer autenticação: Bearer {{tokenJoao}}\n💡 Pólen - Ambiental (alergiaId = 15)\n📝 Severidade: LEVE"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "📋 Consultas Finais",
+      "item": [
+        {
+          "name": "32 - João Consulta Histórico de Vacinas de Ana",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenJoao}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/registros-vacina/pessoas/{{anaId}}/historico",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "registros-vacina", "pessoas", "{{anaId}}", "historico"]
+            },
+            "description": "João visualiza todas as vacinas aplicadas em Ana.\n✅ Resposta esperada: 200 OK com lista de vacinas aplicadas\n🔐 Requer autenticação: Bearer {{tokenJoao}}\n💡 Mostra apenas doses com status APLICADA\n💡 João pode ver mesmo sendo Maria quem registrou (ambos são responsáveis)"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "33 - Maria Consulta Alergias de Ana",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenMaria}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/pessoas/{{anaId}}/alergias",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "pessoas", "{{anaId}}", "alergias"]
+            },
+            "description": "Maria visualiza todas as alergias registradas para Ana.\n✅ Resposta esperada: 200 OK com lista de alergias\n🔐 Requer autenticação: Bearer {{tokenMaria}}\n💡 Maria pode ver alergias cadastradas por João (ambos são responsáveis)\n📋 Deve retornar 3 alergias: Penicilina, Camarão e Pólen"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Deve retornar 3 alergias\", function () {",
+                  "    var json = pm.response.json();",
+                  "    var lista = Array.isArray(json) ? json : (json.content || json.data || []);",
+                  "    pm.expect(lista.length).to.eql(3);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "34 - Verificar Calendário Vacinal Completo de Ana",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenMaria}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/registros-vacina/pessoas/{{anaId}}/calendario",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "registros-vacina", "pessoas", "{{anaId}}", "calendario"]
+            },
+            "description": "Visualizar calendário completo (aplicadas + pendentes + atrasadas).\n✅ Resposta esperada: 200 OK com todas as doses previstas do PNI\n🔐 Requer autenticação: Bearer {{tokenMaria}}\n💡 Mostra status de cada dose:\n   ├─ APLICADA: doses já registradas\n   ├─ PENDENTE: doses não aplicadas, dentro do prazo\n   └─ ATRASADA: doses não aplicadas, fora do prazo\n📊 Ana tem 6 anos, várias doses podem estar atrasadas"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

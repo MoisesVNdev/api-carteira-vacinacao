@@ -1,11 +1,11 @@
 # 📋 API Carteira de Vacinação Digital
 
-API REST desenvolvida em **Java 21** com **Spring Boot 4.0.2** projetada para ser uma ferramenta auxiliar no controle do calendário vacinal. O foco principal é apoiar pais e responsáveis no acompanhamento da saúde de crianças e adolescentes, oferecendo uma camada extra de segurança e organização aos registros físicos.
+API REST desenvolvida em **Java 21** com **Spring Boot 4.0.3** projetada para ser uma ferramenta auxiliar no controle do calendário vacinal. O foco principal é apoiar pais e responsáveis no acompanhamento da saúde de crianças e adolescentes, oferecendo uma camada extra de segurança e organização aos registros físicos.
 
-O projeto não tem o objetivo de substituir a carteira de vacinação física, mas sim complementá-la, oferecendo funcionalidades como alertas de próximas vacinas por notificação/e-mail, histórico vacinal, registro de alergias e armazenamento de foto da carteira física para consulta em caso de perda ou esquecimento.
+O projeto não tem o objetivo de substituir a carteira de vacinação física, mas sim complementá-la, oferecendo funcionalidades como alertas de próximas vacinas, histórico vacinal detalhado, registro de alergias e armazenamento de fotos da carteira física para consulta em caso de perda ou esquecimento.
 
 ![Java](https://img.shields.io/badge/Java-21-orange?logo=openjdk)
-![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.0.2-brightgreen?logo=spring)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.0.3-brightgreen?logo=spring)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue?logo=postgresql)
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
@@ -18,75 +18,211 @@ Este projeto nasceu da necessidade de modernizar o acompanhamento vacinal famili
 
 Como desenvolvedor, utilizei este projeto para aplicar conceitos modernos de arquitetura, focando em:
 
-- ✅ Arquitetura REST seguindo os princípios SOLID
-- ✅ Autenticação e autorização com Spring Security + JWT
-- ✅ Persistência de dados com Spring Data JPA e PostgreSQL
-- ✅ Containerização com Docker e Docker Compose
-- ✅ Boas práticas de segurança (BCrypt, usuário não-root, health checks)
-- ✅ Separação de camadas (Controller → Service → Repository)
-- ✅ DTOs para proteção das entidades
-- ✅ Tratamento centralizado de exceções
+- ✅ **Arquitetura REST** seguindo os princípios **SOLID**
+- ✅ **Autenticação e Autorização** com Spring Security + JWT
+- ✅ **Persistência de dados** com Spring Data JPA e PostgreSQL
+- ✅ **Migrações versionadas** com Flyway
+- ✅ **Containerização** com Docker e Docker Compose
+- ✅ **Boas práticas de segurança** (BCrypt, usuário não-root, health checks)
+- ✅ **Separação de camadas** (Controller → Service → Repository)
+- ✅ **DTOs** para proteção das entidades
+- ✅ **Tratamento centralizado de exceções** (@ControllerAdvice)
+- ✅ **Documentação interativa** com SpringDoc OpenAPI
 
 ---
 
-## ✨ Funcionalidades Planejadas e Implementadas
+## ✨ Funcionalidades
 
-## Auxílio ao Responsável
+### 🔐 Autenticação e Segurança
+- **CRUD Completo**: Criação, leitura, atualização e exclusão de usuários, pessoas, responsáveis, vacinas, alergias e registros vacinais
+- **Segurança**: Autenticação e autorização baseada em JWT utilizando Spring Security
+- **Validação de Dados**: Uso de Bean Validation para garantir a integridade das requisições (`@Valid`, `@NotNull`, `@Size`, etc.)
+- **Tratamento de Exceções**: Respostas de erro padronizadas (Global Exception Handler) com mensagens claras
+- **Documentação Interativa**: Interface visual para testar os endpoints utilizando Swagger UI / SpringDoc
+- **Registro de usuários** com validação de dados completa
+- **Login seguro** com geração de token JWT (JJWT 0.11.5)
+- **Proteção de endpoints** via Spring Security com filtro de autenticação
+- **Hash de senhas** utilizando BCrypt (nunca armazenadas em texto puro)
+- **Controle de acesso** baseado em roles/papéis
 
-* 🔔 **Alertas de Vacinação:** Sistema de notificações via e-mail e alertas internos para lembrar a data das próximas doses.
-* 📋 **Histórico e Alergias:** Registro detalhado de vacinas aplicadas e controle de alergias para evitar reações adversas.
-* 📸 **Cópia de Segurança:** Possibilidade de armazenar fotos da carteira física, prevenindo a perda de informações caso o documento original seja extraviado ou esquecido.
+### 👥 Gestão de Usuários e Pessoas
+- **CRUD completo de Usuários**: Criação, leitura, atualização e exclusão de contas de usuário
+- **CRUD completo de Pessoas**: Gerenciamento de perfis pessoais (crianças, adolescentes, adultos)
+- **Vínculo Responsável-Pessoa**: Relacionamento entre usuários responsáveis e as pessoas sob seus cuidados (ex.: pais, mães, tutores)
 
-### Autenticação e Autorização
-- 🔐 **Registro de usuários** com validação de dados
-- 🔑 **Login** com geração de token JWT
-- 🛡️ **Proteção de endpoints** via Spring Security
-- 🔒 **Hash de senhas** com BCrypt
+### 💉 Gestão Vacinal
+- **CRUD de Vacinas**: Cadastro e gerenciamento de vacinas do calendário nacional (PNI)
+- **Esquemas Vacinais**: Definição de esquemas de vacinação por faixa etária
+- **Registro de Vacinas**: Histórico detalhado de vacinas aplicadas com datas e lotes
+- **Status Vacinal**: Controle de doses pendentes, em dia ou atrasadas
+- **Dados pré-populados**: Base do PNI (Programa Nacional de Imunizações) via migrations
 
-### Gestão de Dados
-- 👤 **Usuários**: CRUD completo com validações
-- 👥 **Pessoas**: Gerenciamento de perfis pessoais
-- 👨‍👩‍👧 **Responsáveis**: Vínculo entre usuários e pessoas (ex.: pais, mães, tutores)
-- 💉 **Registros vacinais**: Histórico de vacinas e alergias *(em desenvolvimento)*
-- 📷 **Foto da carteira**: Armazenamento de imagem da carteira física *(em desenvolvimento)*
+### 🩺 Gestão de Alergias
+- **CRUD de Alergias**: Cadastro de alergias conhecidas
+- **Vínculo Pessoa-Alergia**: Registro de alergias específicas para cada pessoa
+- **Dados pré-populados**: Base inicial com alergias comuns (via migration)
 
-### Notificações e Alertas
-- 🔔 **Alertas de próximas vacinas** via notificação e/ou e-mail *(em desenvolvimento)*
-- 📅 **Calendário vacinal** com datas previstas para cada dose *(em desenvolvimento)*
-
-### Monitoramento
-- ❤️ **Health checks** via Spring Actuator
-- 📊 **Métricas da aplicação** (CPU, memória, requisições)
+### 📊 Recursos Adicionais
+- **Health Check**: Endpoint Actuator para monitoramento da saúde da aplicação
+- **CORS configurado**: Suporte para requisições de diferentes origens
+- **Auditoria**: Timestamps automáticos de criação e atualização
+- **Testes REST integrados**: Arquivos `.http` para testar endpoints rapidamente
 
 ---
 
-## 🛠️ Stack Tecnológica
+## 💻 Tecnologias Utilizadas
 
-### Back-end
-| Tecnologia              | Versão     | Finalidade                                    |
-|-------------------------|------------|-----------------------------------------------|
-| **Java**                | 21         | Linguagem principal                           |
-| **Spring Boot**         | 4.0.2      | Framework para aplicações Java                |
-| **Spring Data JPA**     | (incluído) | ORM para persistência de dados                |
-| **Spring Security**     | (incluído) | Autenticação e autorização                    |
-| **Spring Validation**   | (incluído) | Validação de entrada                          |
-| **Spring Actuator**     | (incluído) | Monitoramento e métricas                      |
-| **JJWT**                | 0.11.5     | Geração e validação de tokens JWT             |
-| **Lombok**              | (incluído) | Redução de código boilerplate                 |
+### 🔧 Backend
+- **Linguagem:** Java 21 LTS
+- **Framework:** Spring Boot 4.0.3
+  - Spring Web (REST API)
+  - Spring Data JPA (ORM)
+  - Spring Security (Autenticação e Autorização)
+  - Spring Validation (Validação de dados)
+  - Spring Actuator (Monitoramento)
 
-### Banco de Dados
-| Tecnologia      | Versão     | Finalidade                                    |
-|-----------------|------------|-----------------------------------------------|
-| **PostgreSQL**  | 16 Alpine  | Banco de dados relacional principal           |
-| **H2 Database** | (test)     | Banco em memória para testes                  |
-| **HikariCP**    | (incluído) | Pool de conexões de alta performance          |
+### 🔒 Segurança
+- **JSON Web Tokens (JWT):** JJWT 0.11.5
+- **Criptografia:** BCrypt para hash de senhas
 
-### DevOps
-| Tecnologia         | Versão | Finalidade                                    |
-|--------------------|--------|-----------------------------------------------|
-| **Docker**         | 20+    | Containerização da aplicação                  |
-| **Docker Compose** | 2.0+   | Orquestração de múltiplos containers          |
-| **Maven**          | 3.9+   | Gerenciamento de dependências e build         |
+### 💾 Banco de Dados
+- **SGBD:** PostgreSQL 16 (Imagem Alpine via Docker)
+- **Driver:** PostgreSQL JDBC Driver
+- **Pool de Conexões:** HikariCP (padrão do Spring Boot)
+
+### 🗄️ Migrações
+- **Flyway:** 10.8.1 (versionamento e controle de esquema do banco)
+
+### 📝 Documentação
+- **SpringDoc OpenAPI:** 2.8.2 (Swagger UI integrado)
+
+### 🛠️ Gerenciador de Dependências
+- **Maven:** 3.9+
+
+### 🐳 DevOps
+- **Docker:** Containerização da aplicação
+- **Docker Compose:** Orquestração de containers (app + banco)
+- **Multi-stage Build:** Otimização da imagem Docker
+
+### 🧰 Ferramentas Auxiliares
+- **Lombok:** Redução de boilerplate
+- **H2 Database:** Banco em memória para testes
+
+---
+
+## 🛠️ Pré-requisitos
+
+Para rodar este projeto localmente, você precisará ter instalado:
+
+- [Java 21](https://adoptium.net/) ou superior
+- [Maven](https://maven.apache.org/) 3.9+
+- [Docker](https://www.docker.com/) e [Docker Compose](https://docs.docker.com/compose/)
+- [Git](https://git-scm.com/)
+
+> **Nota:** Se você usar Docker Compose, não é necessário instalar PostgreSQL localmente.
+
+---
+
+## 🚀 Como Executar o Projeto
+
+### 1️⃣ Clone o repositório
+
+```bash
+git clone https://github.com/MoisesVNdev/api-carteira-vacinacao.git
+cd api-carteira-vacinacao
+```
+
+### 2️⃣ Configure as variáveis de ambiente
+
+Crie um arquivo `.env` na raiz do projeto com as seguintes variáveis:
+
+```env
+# Nome do projeto (usado como prefixo nos containers)
+COMPOSE_PROJECT_NAME=carteira-vacinacao
+
+# PostgreSQL - Credenciais
+POSTGRES_DB=carteira_vacinacao_db
+POSTGRES_USER=admin_vacinas
+POSTGRES_PASSWORD=sua_senha_segura_aqui
+
+# Spring Boot - Configurações
+SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/carteira_vacinacao_db
+SPRING_DATASOURCE_USERNAME=admin_vacinas
+SPRING_DATASOURCE_PASSWORD=sua_senha_segura_aqui
+
+# JWT - Chave secreta (mínimo 256 bits / 32 caracteres)
+JWT_SECRET=sua_chave_secreta_jwt_muito_longa_e_segura_aqui_com_minimo_32_chars
+
+# Timezone
+TZ=America/Sao_Paulo
+```
+
+> **⚠️ IMPORTANTE:** Nunca commite o arquivo `.env` no Git! Ele já está listado no `.gitignore`.
+
+### 3️⃣ Execução com Docker Compose (Recomendado)
+
+#### Iniciar a aplicação
+```bash
+docker-compose up -d
+```
+
+#### Verificar logs
+```bash
+docker-compose logs -f
+```
+
+#### Parar a aplicação
+```bash
+docker-compose down
+```
+
+#### Parar e remover volumes (limpa o banco de dados)
+```bash
+docker-compose down -v
+```
+
+#### Reconstruir a imagem após mudanças no código
+```bash
+docker-compose up -d --build
+```
+
+### 4️⃣ Execução Local (Sem Docker)
+
+Se preferir rodar localmente sem Docker:
+
+#### 1. Instale e configure o PostgreSQL 16
+
+#### 2. Configure o banco de dados
+
+```sql
+CREATE DATABASE carteira_vacinacao_db;
+CREATE USER admin_vacinas WITH PASSWORD 'sua_senha';
+GRANT ALL PRIVILEGES ON DATABASE carteira_vacinacao_db TO admin_vacinas;
+```
+
+#### 3. Execute a aplicação com Maven
+
+```bash
+mvn clean install
+mvn spring-boot:run
+```
+
+Ou usando o wrapper do Maven:
+```bash
+./mvnw clean install
+./mvnw spring-boot:run
+```
+
+---
+
+## 🌐 Acessando a Aplicação
+
+Após iniciar, a aplicação estará disponível em:
+
+- **API Base URL:** http://localhost:8080
+- **Swagger UI (Documentação):** http://localhost:8080/swagger-ui.html
+- **OpenAPI JSON:** http://localhost:8080/v3/api-docs
+- **Health Check:** http://localhost:8080/actuator/health
 
 ---
 
@@ -96,16 +232,44 @@ Como desenvolvedor, utilizei este projeto para aplicar conceitos modernos de arq
 
 ```
 src/main/java/com/moisesvn/carteira_vacinacao_api/
-├── config/             → Configurações (CORS, beans, etc.)
-├── controller/         → Camada HTTP (recebe requisições e delega ao Service)
-├── dto/                → Data Transfer Objects (entrada/saída da API)
-├── exception/          → Tratamento centralizado de exceções
-├── mapper/             → Conversão entre entidades e DTOs
-├── model/              → Entidades JPA (mapeamento com o banco de dados)
-├── repository/         → Interfaces Spring Data JPA
-├── security/           → Configuração JWT, filtros e UserDetailsService
-└── service/            → Regras de negócio e orquestração
+├── config/               → Configurações do Spring (CORS, Beans, etc.)
+├── controller/           → Camada HTTP: recebe requisições, delega ao Service
+│   ├── AlergiaController.java
+│   ├── AuthController.java
+│   ├── HomeController.java
+│   ├── PessoaAlergiaController.java
+│   ├── PessoaController.java
+│   ├── RegistroVacinaController.java
+│   ├── ResponsavelController.java
+│   ├── UsuarioController.java
+│   └── VacinaController.java
+├── dto/                  → Objetos de transferência (Request/Response)
+├── exception/            → Handlers globais (@ControllerAdvice), exceções customizadas
+├── mapper/               → Conversores entre Entidade ↔ DTO
+├── model/                → Entidades JPA (@Entity)
+│   ├── Alergia.java
+│   ├── EsquemaVacinal.java
+│   ├── Pessoa.java
+│   ├── PessoaAlergia.java
+│   ├── RegistroVacina.java
+│   ├── Responsavel.java
+│   ├── StatusVacinal.java
+│   ├── Usuario.java
+│   └── Vacina.java
+├── openapi/              → Configuração e customização do SpringDoc
+├── repository/           → Interfaces Spring Data JPA
+├── security/             → Configuração JWT, filtros, UserDetailsService
+└── service/              → Regras de negócio, validações, orquestração
 ```
+
+### Princípio de Camadas
+- **Controller** → Recebe requisições HTTP, valida entrada, chama Service
+- **Service** → Contém regras de negócio, orquestra operações
+- **Repository** → Acessa o banco de dados via Spring Data JPA
+- **DTO** → Objetos de entrada/saída da API, protegem as entidades
+- **Model** → Entidades JPA que representam as tabelas do banco
+
+> **Regra de Ouro:** Nenhuma camada deve pular outra. Controller nunca acessa Repository diretamente.
 
 ### Fluxo de Requisição
 
@@ -139,411 +303,212 @@ Requisição HTTP
 
 ---
 
-## 📦 Modelo de Dados
+## 🔌 Principais Endpoints da API
 
-### Principais Entidades
+### 🔓 Autenticação (Público)
+| Método | Endpoint          | Descrição                    |
+|--------|-------------------|------------------------------|
+| POST   | `/auth/register`  | Registrar novo usuário       |
+| POST   | `/auth/login`     | Autenticar e obter token JWT |
 
-**Usuario**
-- `id` (PK)
-- `email` (único)
-- `password` (hash BCrypt)
-- `role` (enum: USER, ADMIN)
+### 🔐 Usuários (Autenticado)
+| Método | Endpoint              | Descrição                    |
+|--------|-----------------------|------------------------------|
+| GET    | `/api/usuarios`       | Listar todos os usuários     |
+| GET    | `/api/usuarios/{id}`  | Buscar usuário por ID        |
+| PUT    | `/api/usuarios/{id}`  | Atualizar usuário            |
+| DELETE | `/api/usuarios/{id}`  | Deletar usuário              |
 
-**Pessoa**
-- `id` (PK)
-- `nome`
-- `dataNascimento`
-- `cpf` (único)
-- `genero`
+### 👥 Pessoas (Autenticado)
+| Método | Endpoint             | Descrição                  |
+|--------|----------------------|----------------------------|
+| POST   | `/api/pessoas`       | Criar nova pessoa          |
+| GET    | `/api/pessoas`       | Listar todas as pessoas    |
+| GET    | `/api/pessoas/{id}`  | Buscar pessoa por ID       |
+| PUT    | `/api/pessoas/{id}`  | Atualizar pessoa           |
+| DELETE | `/api/pessoas/{id}`  | Deletar pessoa             |
 
-**Responsavel**
-- `id` (PK)
-- `usuarioId` (FK → Usuario)
-- `pessoaId` (FK → Pessoa)
-- `tipoRelacao` (ex.: PAI, MAE, TUTOR)
+### 💉 Vacinas (Autenticado)
+| Método | Endpoint            | Descrição                 |
+|--------|---------------------|---------------------------|
+| POST   | `/api/vacinas`      | Cadastrar nova vacina     |
+| GET    | `/api/vacinas`      | Listar todas as vacinas   |
+| GET    | `/api/vacinas/{id}` | Buscar vacina por ID      |
+| PUT    | `/api/vacinas/{id}` | Atualizar vacina          |
+| DELETE | `/api/vacinas/{id}` | Deletar vacina            |
 
-> **Diagrama EER disponível em:** `/EER Diagram/V1.0/`
+### 🩺 Alergias (Autenticado)
+| Método | Endpoint             | Descrição                   |
+|--------|----------------------|-----------------------------|
+| POST   | `/api/alergias`      | Cadastrar nova alergia      |
+| GET    | `/api/alergias`      | Listar todas as alergias    |
+| GET    | `/api/alergias/{id}` | Buscar alergia por ID       |
+| PUT    | `/api/alergias/{id}` | Atualizar alergia           |
+| DELETE | `/api/alergias/{id}` | Deletar alergia             |
 
----
+### 📋 Registros Vacinais (Autenticado)
+| Método | Endpoint                     | Descrição                         |
+|--------|------------------------------|-----------------------------------|
+| POST   | `/api/registros-vacina`      | Registrar aplicação de vacina     |
+| GET    | `/api/registros-vacina`      | Listar todos os registros         |
+| GET    | `/api/registros-vacina/{id}` | Buscar registro por ID            |
+| PUT    | `/api/registros-vacina/{id}` | Atualizar registro                |
+| DELETE | `/api/registros-vacina/{id}` | Deletar registro                  |
 
-## 🚀 Como Executar
+### 👨‍👩‍👧 Responsáveis (Autenticado)
+| Método | Endpoint                        | Descrição                         |
+|--------|---------------------------------|-----------------------------------|
+| POST   | `/api/responsaveis`             | Vincular responsável              |
+| GET    | `/api/responsaveis`             | Listar todos os responsáveis      |
+| GET    | `/api/responsaveis/{id}`        | Buscar responsável por ID         |
+| DELETE | `/api/responsaveis/{id}`        | Deletar vínculo                   |
 
-### Pré-requisitos
-
-- **Java 21** ou superior ([Download OpenJDK](https://openjdk.org/))
-- **Docker** e **Docker Compose** ([Instalação](https://docs.docker.com/get-docker/))
-- **Maven 3.9+** (opcional, apenas para build manual)
-
-### Variáveis de Ambiente (Opcional)
-
-Crie um arquivo `.env` na raiz do projeto (já está no `.gitignore`):
-
-```bash
-# Identificador do projeto
-COMPOSE_PROJECT_NAME=carteira-vacinacao
-
-# PostgreSQL
-POSTGRES_DB=carteira_vacinacao_db
-POSTGRES_USER=usuario_app
-POSTGRES_PASSWORD=senha_segura_123
-POSTGRES_PORT=5432
-
-# Spring Boot
-SPRING_PROFILE=dev
-JPA_DDL_AUTO=update
-JPA_SHOW_SQL=true
-
-# JWT
-JWT_SECRET=sua-chave-secreta-base64-aqui-com-minimo-256-bits
-JWT_EXPIRATION=86400000
-
-# Aplicação
-APP_PORT=8080
-TZ=America/Sao_Paulo
-```
-
-### Execução com Docker (Recomendado)
-
-1. **Clone o repositório:**
-   ```bash
-   git clone https://github.com/MoisesVNdev/api-carteira-vacinacao.git
-   cd api-carteira-vacinacao
-   ```
-
-2. **Inicie os containers:**
-   ```bash
-   docker-compose up -d
-   ```
-
-3. **Verifique os logs:**
-   ```bash
-   docker-compose logs -f app
-   ```
-
-4. **Acesse a aplicação:**
-   - API: `http://localhost:8080`
-   - Health Check: `http://localhost:8080/actuator/health`
-
-5. **Pare os containers:**
-   ```bash
-   docker-compose down
-   ```
-
-### Execução Manual (Sem Docker)
-
-1. **Configure o PostgreSQL:**
-   ```sql
-   CREATE DATABASE carteira_vacinacao_db;
-   CREATE USER usuario_app WITH PASSWORD 'senha_segura_123';
-   GRANT ALL PRIVILEGES ON DATABASE carteira_vacinacao_db TO usuario_app;
-   ```
-
-2. **Configure o `application.yml`:**
-   ```yaml
-   spring:
-     datasource:
-       url: jdbc:postgresql://localhost:5432/carteira_vacinacao_db
-       username: usuario_app
-       password: senha_segura_123
-   ```
-
-3. **Compile e execute:**
-   ```bash
-   ./mvnw clean package -DskipTests
-   java -jar target/carteira-vacinacao-api-0.0.1-SNAPSHOT.jar
-   ```
+> **Nota:** Para detalhes completos sobre requisições e respostas, acesse a documentação interativa no Swagger UI em http://localhost:8080/swagger-ui.html
 
 ---
 
-## 📡 Endpoints da API
+## 🗄️ Modelo de Dados
 
-### Autenticação (Público)
+O projeto utiliza as seguintes tabelas principais:
 
-#### Registro de Usuário
-```bash
-POST /auth/register
-Content-Type: application/json
+- **usuario**: Contas de acesso ao sistema
+- **pessoa**: Perfis de indivíduos (crianças, adolescentes, adultos)
+- **responsavel**: Relacionamento entre usuários e pessoas (ex.: pai → filho)
+- **alergia**: Cadastro de alergias conhecidas
+- **pessoa_alergia**: Alergias específicas de cada pessoa
+- **vacina**: Catálogo de vacinas disponíveis (PNI)
+- **esquema_vacinal**: Esquemas de vacinação por faixa etária
+- **registro_vacina**: Histórico de vacinas aplicadas
 
-{
-  "email": "usuario@exemplo.com",
-  "password": "senha123",
-  "confirmPassword": "senha123"
-}
+### Migrations Flyway
+
+```
+src/main/resources/db/migration/
+├── V1__create_usuario_table.sql
+├── V2__create_pessoa_and_responsavel_tables.sql
+├── V3__create_alergia_and_pessoa_alergia_tables.sql
+├── V4__insert_alergia_data.sql
+├── V5__create_vacina_esquema_vacinal_registro_vacina_tables.sql
+└── V6__insert_vacina_esquema_vacinal_pni_data.sql
 ```
 
-**Resposta (201 Created):**
-```json
-{
-  "id": 1,
-  "email": "usuario@exemplo.com",
-  "role": "USER",
-  "createdAt": "2026-02-20T10:30:00"
-}
+> **Diagrama EER disponível em:** `EER Diagram/V2.0/`
+
+---
+
+## 🧪 Testando a API
+
+### Usando Cliente REST (VS Code)
+
+Há arquivos `.http` na pasta `Client-REST-testes/` que você pode executar diretamente no VS Code com a extensão REST Client:
+
+```
+Client-REST-testes/
+├── API-Fluxo-Corrigido-Modificado.http
+├── API-Testes-Vacinacao.http
+└── API-TestesValidos.http
+```
+
+### Usando Swagger UI
+
+Acesse http://localhost:8080/swagger-ui.html e teste todos os endpoints de forma interativa.
+
+### Usando cURL
+
+#### Registrar usuário
+```bash
+curl -X POST http://localhost:8080/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "nome": "João Silva",
+    "email": "joao@example.com",
+    "senha": "senha123"
+  }'
 ```
 
 #### Login
 ```bash
-POST /auth/login
-Content-Type: application/json
-
-{
-  "email": "usuario@exemplo.com",
-  "password": "senha123"
-}
+curl -X POST http://localhost:8080/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "joao@example.com",
+    "senha": "senha123"
+  }'
 ```
 
-**Resposta (200 OK):**
-```json
-{
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "type": "Bearer",
-  "expiresIn": 86400000
-}
+#### Listar vacinas (com token)
+```bash
+curl -X GET http://localhost:8080/api/vacinas \
+  -H "Authorization: Bearer SEU_TOKEN_JWT_AQUI"
 ```
 
 ---
 
-### Usuários (Autenticado)
+## 🐳 Comandos Docker Úteis
 
-#### Listar Usuários
+Consulte o arquivo [docker/COMANDOS-UTEIS.md](docker/COMANDOS-UTEIS.md) para lista completa de comandos Docker úteis.
+
+### Comandos Rápidos
+
 ```bash
-GET /api/usuarios
-Authorization: Bearer {token}
-```
+# Ver containers em execução
+docker ps
 
-#### Buscar Usuário por ID
-```bash
-GET /api/usuarios/1
-Authorization: Bearer {token}
-```
+# Ver logs da aplicação
+docker logs -f carteira-vacinacao-app
 
-#### Atualizar Usuário
-```bash
-PUT /api/usuarios/1
-Authorization: Bearer {token}
-Content-Type: application/json
+# Ver logs do banco de dados
+docker logs -f carteira-vacinacao-postgres
 
-{
-  "email": "novo-email@exemplo.com",
-  "password": "novaSenha123"
-}
-```
+# Acessar o shell do container da aplicação
+docker exec -it carteira-vacinacao-app sh
 
-#### Deletar Usuário
-```bash
-DELETE /api/usuarios/1
-Authorization: Bearer {token}
+# Acessar o PostgreSQL via psql
+docker exec -it carteira-vacinacao-postgres psql -U admin_vacinas -d carteira_vacinacao_db
+
+# Remover todos os containers, volumes e imagens do projeto
+docker-compose down -v --rmi all
 ```
 
 ---
 
-### Pessoas (Autenticado)
+## 🔧 Desenvolvimento
 
-#### Criar Pessoa
+### Executar testes
 ```bash
-POST /api/pessoas
-Authorization: Bearer {token}
-Content-Type: application/json
-
-{
-  "nome": "João Silva",
-  "dataNascimento": "1990-05-15",
-  "cpf": "12345678901",
-  "genero": "MASCULINO"
-}
-```
-
-#### Listar Todas as Pessoas
-```bash
-GET /api/pessoas
-Authorization: Bearer {token}
-```
-
-#### Buscar Pessoa por ID
-```bash
-GET /api/pessoas/1
-Authorization: Bearer {token}
-```
-
-#### Atualizar Pessoa
-```bash
-PUT /api/pessoas/1
-Authorization: Bearer {token}
-Content-Type: application/json
-
-{
-  "nome": "João Silva Santos",
-  "dataNascimento": "1990-05-15",
-  "cpf": "12345678901",
-  "genero": "MASCULINO"
-}
-```
-
-#### Deletar Pessoa
-```bash
-DELETE /api/pessoas/1
-Authorization: Bearer {token}
-```
-
----
-
-### Responsáveis (Autenticado)
-
-#### Vincular Responsável
-```bash
-POST /api/responsaveis
-Authorization: Bearer {token}
-Content-Type: application/json
-
-{
-  "usuarioId": 1,
-  "pessoaId": 2,
-  "tipoRelacao": "PAI"
-}
-```
-
-#### Listar Responsáveis de um Usuário
-```bash
-GET /api/responsaveis/usuario/1
-Authorization: Bearer {token}
-```
-
-#### Buscar Responsável por ID
-```bash
-GET /api/responsaveis/1
-Authorization: Bearer {token}
-```
-
-#### Deletar Vínculo
-```bash
-DELETE /api/responsaveis/1
-Authorization: Bearer {token}
-```
-
----
-
-### Monitoramento (Público)
-
-#### Health Check
-```bash
-GET /actuator/health
-```
-
-**Resposta:**
-```json
-{
-  "status": "UP",
-  "components": {
-    "db": {
-      "status": "UP",
-      "details": {
-        "database": "PostgreSQL",
-        "validationQuery": "isValid()"
-      }
-    },
-    "diskSpace": {
-      "status": "UP"
-    }
-  }
-}
-```
-
-#### Métricas
-```bash
-GET /actuator/metrics
-```
-
----
-
-## 🧪 Testes
-
-### Executar Testes Unitários
-
-```bash
-# Com Maven Wrapper
-./mvnw test
-
-# Com Maven instalado
 mvn test
 ```
 
-### Executar Testes com Cobertura
-
+### Gerar relatório de cobertura
 ```bash
-./mvnw test jacoco:report
+mvn clean verify
 ```
 
-> **Relatório de cobertura:** `target/site/jacoco/index.html`
-
----
-
-## 📁 Estrutura de Arquivos
-
+### Compilar sem executar testes
+```bash
+mvn clean install -DskipTests
 ```
-carteira-vacinacao-api/
-├── Client REST testes/      → Arquivos .http para testar os endpoints
-├── docker/
-│   ├── postgres/init/       → Scripts SQL de inicialização
-│   └── COMANDOS-UTEIS.md
-├── EER Diagram/             → Diagrama Entidade-Relacionamento
-├── src/
-│   ├── main/
-│   │   ├── java/.../        → Código-fonte da aplicação
-│   │   └── resources/
-│   │       ├── application.yml
-│   │       └── application.properties
-│   └── test/                → Testes unitários e de integração
-├── target/                  → Arquivos compilados (não versionado)
-├── .gitignore
-├── docker-compose.yml       → Orquestração de containers
-├── Dockerfile               → Imagem multi-stage da aplicação
-├── pom.xml                  → Dependências Maven
-└── README.md                → Este arquivo
+
+### Verificar se há dependências desatualizadas
+```bash
+mvn versions:display-dependency-updates
 ```
 
 ---
 
-## 🚢 Deploy
+## 📊 Diagrama Entidade-Relacionamento (EER)
 
-### Heroku
+O projeto inclui diagramas EER criados no MySQL Workbench:
 
-```bash
-# Instalar o Heroku CLI
-heroku login
-
-# Criar a aplicação
-heroku create nome-da-sua-app
-
-# Adicionar o PostgreSQL
-heroku addons:create heroku-postgresql:mini
-
-# Configurar variáveis de ambiente
-heroku config:set JWT_SECRET="sua-chave-secreta"
-heroku config:set SPRING_PROFILES_ACTIVE=prod
-
-# Deploy
-git push heroku main
 ```
-
-### Docker Hub
-
-```bash
-# Build da imagem
-docker build -t seu-usuario/carteira-vacinacao-api:latest .
-
-# Login no Docker Hub
-docker login
-
-# Push da imagem
-docker push seu-usuario/carteira-vacinacao-api:latest
+EER Diagram/
+├── V1.0/
+│   ├── EER - Carteira de Vacinação.mwb
+│   └── EER-Diagram-carteira-de-vacinacao.sql
+└── V2.0/
+    ├── EER-Diagram-carteira-de-vacinacao.mwb
+    └── EER-Diagram-carteira-de-vacinacao.sql
 ```
-
-### Railway / Render
-
-1. Conecte o repositório do GitHub
-2. Configure as variáveis de ambiente
-3. Defina o comando de build: `mvn clean package -DskipTests`
-4. Defina o comando de start: `java -jar target/*.jar`
 
 ---
 
@@ -558,35 +523,44 @@ docker push seu-usuario/carteira-vacinacao-api:latest
 ✅ **DTOs** para evitar a exposição direta das entidades  
 ✅ **Validação de entrada** com Bean Validation  
 ✅ **Health checks** para monitoramento da saúde da aplicação  
+✅ **CORS configurado** adequadamente  
 ✅ **HTTPS** recomendado em produção (configurar via proxy reverso)
 
 ### Melhorias Sugeridas para Produção
 
 - [ ] Implementar refresh tokens
 - [ ] Adicionar rate limiting (ex.: Bucket4J)
-- [ ] Configurar o CORS adequadamente
 - [ ] Implementar auditoria de operações
 - [ ] Adicionar logs estruturados (JSON)
 - [ ] Configurar SSL/TLS no PostgreSQL
 - [ ] Implementar backup automático do banco de dados
 - [ ] Adicionar testes de carga (JMeter, Gatling)
+- [ ] Implementar monitoramento com Prometheus + Grafana
 
 ---
 
 ## 🛤️ Roadmap
 
+### ✅ Funcionalidades Implementadas
 - [x] Autenticação JWT
 - [x] CRUD de Usuários
 - [x] CRUD de Pessoas
 - [x] Vínculo de Responsáveis
-- [ ] Gestão de Vacinas (calendário vacinal)
-- [ ] Registro de Doses Aplicadas
-- [ ] Histórico de alergias
+- [x] CRUD de Vacinas
+- [x] CRUD de Alergias
+- [x] Registro de Vacinas
+- [x] Esquemas Vacinais
+- [x] Migrations com dados do PNI
+
+### 🚧 Funcionalidades Planejadas
 - [ ] Armazenamento de foto da carteira de vacinação física
 - [ ] Alertas e notificações de doses pendentes (e-mail)
 - [ ] Geração de certificados em PDF
-- [ ] API de consulta pública (carteira digital)
+- [ ] Dashboard com estatísticas vacinais
+- [ ] API de consulta pública (carteira digital com QR Code)
 - [ ] Integração com sistemas de saúde (HL7/FHIR)
+- [ ] App mobile (React Native ou Flutter)
+- [ ] Suporte a múltiplos idiomas
 
 ---
 
@@ -599,9 +573,17 @@ docker push seu-usuario/carteira-vacinacao-api:latest
 
 ---
 
-## 🧑‍💻 Sobre o Desenvolvedor
+## 📄 Licença
 
-Este projeto foi desenvolvido como parte do meu portfólio de desenvolvedor back-end júnior. Com ele, busco demonstrar minha capacidade de construir APIs RESTful bem estruturadas, seguras e documentadas, aplicando boas práticas do mercado desde o início do desenvolvimento.
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+
+---
+
+## 👨‍💻 Autor
+
+**Moisés Vila Nova de Oliveira**
+
+Este projeto foi desenvolvido como parte do meu portfólio de desenvolvedor back-end. Com ele, busco demonstrar minha capacidade de construir APIs RESTful bem estruturadas, seguras e documentadas, aplicando boas práticas do mercado desde o início do desenvolvimento.
 
 **Competências demonstradas neste projeto:**
 
@@ -609,41 +591,36 @@ Este projeto foi desenvolvido como parte do meu portfólio de desenvolvedor back
 - ✅ Arquitetura em camadas e princípios SOLID
 - ✅ Segurança com JWT e Spring Security
 - ✅ Persistência de dados com JPA/Hibernate
+- ✅ Migrações de banco de dados com Flyway
 - ✅ Containerização com Docker
 - ✅ Código limpo e documentação técnica
 
-**Autor:** Moisés Vila Nova de Oliveira  
-**GitHub:** [MoisesVNdev](https://github.com/MoisesVNdev)  
-**LinkedIn:** [linkedin.com/in/moisesvndev](https://www.linkedin.com/in/moisesvnoliveira/)  
-**E-mail:** [moisesvn.dev@gmail.com](mailto:moisesvn.dev@gmail.com)
+**Contato:**
+
+- GitHub: [@MoisesVNdev](https://github.com/MoisesVNdev)
+- LinkedIn: [linkedin.com/in/moisesvnoliveira](https://www.linkedin.com/in/moisesvnoliveira/)
+- E-mail: [moisesvn.dev@gmail.com](mailto:moisesvn.dev@gmail.com)
 
 > "Este software é uma ferramenta de apoio. Sempre mantenha sua carteira de vacinação física em local seguro."
----
-
-## 📄 Licença
-
-Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 
 ---
 
-## 🤝 Contribuições
+## 🤝 Contribuindo
 
-Contribuições são muito bem-vindas! Sinta-se à vontade para abrir issues, sugerir melhorias ou enviar pull requests seguindo o fluxo abaixo:
+Contribuições são bem-vindas! Sinta-se à vontade para abrir issues ou pull requests.
 
-1. Faça um fork do projeto
-2. Crie uma branch para a sua feature (`git checkout -b feature/MinhaFeature`)
-3. Faça o commit das suas mudanças (`git commit -m 'Adiciona MinhaFeature'`)
-4. Envie para a branch (`git push origin feature/MinhaFeature`)
+1. Fork o projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/nova-feature`)
+3. Commit suas mudanças (`git commit -m 'Adiciona nova feature'`)
+4. Push para a branch (`git push origin feature/nova-feature`)
 5. Abra um Pull Request
 
 ---
 
-## ⭐ Agradecimentos
+## ⭐ Apoie o Projeto
 
-- Comunidade Spring Boot
-- Documentação oficial do Spring Framework
-- Tutoriais e cursos que serviram de inspiração para este projeto
+Se este projeto foi útil para você, considere dar uma ⭐ no repositório!
 
 ---
 
-**⚡ Desenvolvido com Java, Spring Boot e ❤️**
+**Desenvolvido com ☕ e Java **
