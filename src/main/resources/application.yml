@@ -43,9 +43,6 @@ spring:
       
       # Nome do pool (para logs)
       pool-name: HikariPoolPostgres
-      
-      # Teste de conexão
-      connection-test-query: SELECT 1
   
   # --------------------------------------------------------------------------
   # JPA / HIBERNATE

@@ -70,6 +70,27 @@ services:
       start_period: 60s
     
     # -----------------------------------------------------------------------
+    # LIMITES DE RECURSOS (importante para testes de performance)
+    # -----------------------------------------------------------------------
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+          cpus: '2'
+        reservations:
+          memory: 512m
+    
+    # Configurações de performance do PostgreSQL para testes
+    command:
+      - "postgres"
+      - "-c"
+      - "max_connections=200"
+      - "-c"
+      - "shared_buffers=256MB"
+      - "-c"
+      - "work_mem=4MB"
+    
+    # -----------------------------------------------------------------------
     # REDE
     # -----------------------------------------------------------------------
     networks:
@@ -151,6 +172,11 @@ services:
         -XX:MaxGCPauseMillis=200
         -Djava.security.egd=file:/dev/./urandom
       
+      # HikariCP — pool de conexões ajustado para testes de carga
+      # Sobrescreve os valores do application.yml
+      SPRING_DATASOURCE_HIKARI_MAXIMUMPOOLSIZE: 30
+      SPRING_DATASOURCE_HIKARI_MINIMUMIDLE: 10
+      
       # Porta da aplicação
       SERVER_PORT: 8080
       
@@ -191,6 +217,17 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s
+    
+    # -----------------------------------------------------------------------
+    # LIMITES DE RECURSOS (importante para testes de performance)
+    # -----------------------------------------------------------------------
+    deploy:
+      resources:
+        limits:
+          memory: 1536m
+          cpus: '4'
+        reservations:
+          memory: 768m
     
     # -----------------------------------------------------------------------
     # REDE

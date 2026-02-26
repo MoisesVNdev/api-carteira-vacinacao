@@ -128,12 +128,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
 # -Djava.security.egd: Melhora performance de geração de números aleatórios
 # -XX:+UseContainerSupport: Detecta limites de memória do container
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["java", \
-     "-Djava.security.egd=file:/dev/./urandom", \
-     "-XX:+UseContainerSupport", \
-     "-XX:MaxRAMPercentage=75.0", \
-     "-jar", \
-     "app.jar"]
+CMD ["sh", "-c", "java $JAVA_OPTS -Djava.security.egd=file:/dev/./urandom -XX:+UseContainerSupport -jar app.jar"]
 
 # ============================================================================
 # INSTRUÇÕES DE USO
