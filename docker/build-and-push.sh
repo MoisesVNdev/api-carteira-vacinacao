@@ -19,7 +19,7 @@ set -euo pipefail  # Exit on error, undefined vars, pipe failures
 # ----------------------------------------------------------------------------
 # CONFIGURAÇÕES
 # ----------------------------------------------------------------------------
-DOCKER_USERNAME="${DOCKER_USERNAME:-moisesvndev}"
+DOCKER_USERNAME="${DOCKER_USERNAME:-moisesvn}"
 IMAGE_NAME="${IMAGE_NAME:-carteira-vacinacao-api}"
 FULL_IMAGE="${DOCKER_USERNAME}/${IMAGE_NAME}"
 PLATFORMS="linux/amd64,linux/arm64"
