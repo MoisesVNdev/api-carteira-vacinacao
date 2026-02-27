@@ -8,8 +8,24 @@ O projeto não tem o objetivo de substituir a carteira de vacinação física, m
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.0.3-brightgreen?logo=spring)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue?logo=postgresql)
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker)
+![DockerHub](https://img.shields.io/docker/v/moisevndev/carteira-vacinacao-api?label=DockerHub&logo=docker)
 ![k6](https://img.shields.io/badge/k6-Performance_Tested-7D64FF?logo=k6)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
+
+### 🚀 Quick Start
+
+```bash
+# 1. Baixar a imagem do DockerHub
+docker pull moisevndev/carteira-vacinacao-api:latest
+
+# 2. Configurar variáveis (edite o .env)
+cp .env.example .env
+
+# 3. Executar
+docker-compose -f docker-compose.dockerhub.yml up -d
+```
+
+> 💡 **Sem necessidade de Java, Maven ou build!** Veja mais detalhes na seção [Como Executar](#-como-executar-o-projeto).
 
 ---
 
@@ -120,106 +136,238 @@ Como desenvolvedor, utilizei este projeto para aplicar conceitos modernos de arq
 
 ## 🛠️ Pré-requisitos
 
-Para rodar este projeto localmente, você precisará ter instalado:
+### Para Usuários (Usando Imagem do DockerHub)
 
+Requisitos mínimos:
+- [Docker](https://www.docker.com/) e [Docker Compose](https://docs.docker.com/compose/)
+- ❌ **Não precisa:** Java, Maven ou código-fonte
+
+### Para Desenvolvedores (Build Local)
+
+Requisitos completos:
 - [Java 21](https://adoptium.net/) ou superior
 - [Maven](https://maven.apache.org/) 3.9+
 - [Docker](https://www.docker.com/) e [Docker Compose](https://docs.docker.com/compose/)
 - [Git](https://git-scm.com/)
 
 ### Opcional (Testes de Performance)
-- [k6](https://k6.io/docs/getting-started/installation/) (para executar testes de carga)
+- [k6](https://k6.io/docs/get-started/installation/) (para executar testes de carga)
 
-> **Nota:** Se você usar Docker Compose, não é necessário instalar PostgreSQL localmente.
+> **💡 Dica:** Se você usar Docker Compose, não é necessário instalar PostgreSQL localmente.
 
 ---
 
 ## 🚀 Como Executar o Projeto
 
-### 1️⃣ Clone o repositório
+Existem **duas formas** de executar esta aplicação:
+
+- **🐳 Opção A:** Usando a imagem pronta do DockerHub (recomendado para usuários)
+- **👨‍💻 Opção B:** Build local com Docker Compose (recomendado para desenvolvedores)
+
+---
+
+### 🐳 Opção A: Usando Imagem do DockerHub (Mais Rápido)
+
+**Ideal para:** Testar a aplicação sem precisar do código-fonte ou fazer build.
+
+#### 1️⃣ Baixe a imagem
+
+```bash
+docker pull moisevndev/carteira-vacinacao-api:latest
+```
+
+#### 2️⃣ Configure as variáveis de ambiente
+
+Baixe o arquivo de exemplo ou crie um `.env`:
+
+```bash
+# Baixar do repositório
+curl -o .env.example https://raw.githubusercontent.com/MoisesVNdev/api-carteira-vacinacao/main/.env.example
+
+# Copiar e editar
+cp .env.example .env
+nano .env  # ou use seu editor preferido
+```
+
+Variáveis **obrigatórias** no `.env`:
+
+```env
+# PostgreSQL - Credenciais
+POSTGRES_DB=carteira_vacinacao_db
+POSTGRES_USER=seu_usuario
+POSTGRES_PASSWORD=SUA_SENHA_FORTE_AQUI
+
+# JWT - Segurança (gere com: openssl rand -base64 64)
+JWT_SECRET=SUA_CHAVE_JWT_SECRETA_AQUI_MINIMO_32_CARACTERES
+
+# Opcional
+POSTGRES_PORT=5432
+APP_PORT=8080
+TZ=America/Sao_Paulo
+```
+
+> **🔒 Dica de Segurança:** Gere senhas fortes com `openssl rand -base64 32`
+
+#### 3️⃣ Baixe o docker-compose para produção
+
+```bash
+curl -o docker-compose.dockerhub.yml https://raw.githubusercontent.com/MoisesVNdev/api-carteira-vacinacao/main/docker-compose.dockerhub.yml
+```
+
+Ou use diretamente deste repositório se já clonou:
+
+#### 4️⃣ Execute a aplicação
+
+```bash
+docker-compose -f docker-compose.dockerhub.yml up -d
+```
+
+#### 5️⃣ Verifique se está rodando
+
+```bash
+# Ver logs
+docker-compose -f docker-compose.dockerhub.yml logs -f
+
+# Testar health check
+curl http://localhost:8080/actuator/health
+```
+
+#### Comandos úteis
+
+```bash
+# Parar a aplicação
+docker-compose -f docker-compose.dockerhub.yml down
+
+# Parar e limpar volumes (⚠️ apaga o banco!)
+docker-compose -f docker-compose.dockerhub.yml down -v
+
+# Atualizar para versão mais recente
+docker-compose -f docker-compose.dockerhub.yml pull
+docker-compose -f docker-compose.dockerhub.yml up -d
+```
+
+---
+
+### 👨‍💻 Opção B: Build Local com Docker Compose
+
+**Ideal para:** Desenvolvimento, contribuições ou personalização do código.
+
+#### 1️⃣ Clone o repositório
 
 ```bash
 git clone https://github.com/MoisesVNdev/api-carteira-vacinacao.git
 cd api-carteira-vacinacao
 ```
 
-### 2️⃣ Configure as variáveis de ambiente
+#### 2️⃣ Configure as variáveis de ambiente
 
-Crie um arquivo `.env` na raiz do projeto com as seguintes variáveis:
+```bash
+# Copiar o arquivo de exemplo
+cp .env.example .env
+
+# Editar com suas credenciais
+nano .env  # ou use seu editor preferido
+```
+
+Preencha as variáveis no `.env`:
 
 ```env
-# Nome do projeto (usado como prefixo nos containers)
-COMPOSE_PROJECT_NAME=carteira-vacinacao
+# Nome do projeto
+COMPOSE_PROJECT_NAME=carteira-vacinacao-api
 
-# PostgreSQL - Credenciais
+# PostgreSQL
 POSTGRES_DB=carteira_vacinacao_db
-POSTGRES_USER=admin_vacinas
+POSTGRES_USER=dev_user
 POSTGRES_PASSWORD=sua_senha_segura_aqui
 
-# Spring Boot - Configurações
-SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/carteira_vacinacao_db
-SPRING_DATASOURCE_USERNAME=admin_vacinas
-SPRING_DATASOURCE_PASSWORD=sua_senha_segura_aqui
+# JWT
+JWT_SECRET=sua_chave_jwt_secreta_minimo_32_caracteres
+JWT_EXPIRATION=86400000
 
-# JWT - Chave secreta (mínimo 256 bits / 32 caracteres)
-JWT_SECRET=sua_chave_secreta_jwt_muito_longa_e_segura_aqui_com_minimo_32_chars
+# Perfil Spring
+SPRING_PROFILE=dev
+JPA_DDL_AUTO=update
+JPA_SHOW_SQL=true
 
-# Timezone
-TZ=America/Sao_Paulo
+# Portas
+POSTGRES_PORT=5432
+APP_PORT=8080
 ```
 
-> **⚠️ IMPORTANTE:** Nunca commite o arquivo `.env` no Git! Ele já está listado no `.gitignore`.
+> **⚠️ IMPORTANTE:** O arquivo `.env` nunca deve ser commitado (já está no `.gitignore`)
 
-### 3️⃣ Execução com Docker Compose (Recomendado)
+#### 3️⃣ Execute com Docker Compose
 
-#### Iniciar a aplicação
 ```bash
+# Buildar e iniciar
 docker-compose up -d
+
+# Ou forçar rebuild após mudanças
+docker-compose up -d --build
 ```
 
-#### Verificar logs
+#### 4️⃣ Verifique os logs
+
 ```bash
 docker-compose logs -f
 ```
 
-#### Parar a aplicação
+#### Comandos úteis para desenvolvimento
+
 ```bash
+# Parar containers
 docker-compose down
-```
 
-#### Parar e remover volumes (limpa o banco de dados)
-```bash
+# Parar e remover volumes (limpa o banco)
 docker-compose down -v
+
+# Rebuild completo
+docker-compose build --no-cache
+docker-compose up -d
+
+# Ver status dos containers
+docker-compose ps
 ```
 
-#### Reconstruir a imagem após mudanças no código
-```bash
-docker-compose up -d --build
-```
+---
 
-### 4️⃣ Execução Local (Sem Docker)
+### ⚙️ Opção C: Execução Local (Sem Docker)
 
-Se preferir rodar localmente sem Docker:
+**Ideal para:** Ambientes onde Docker não está disponível ou para debugging nativo.
 
-#### 1. Instale e configure o PostgreSQL 16
+#### 1️⃣ Instale as dependências
 
-#### 2. Configure o banco de dados
+- Java 21 ou superior
+- PostgreSQL 16
+- Maven 3.9+
+
+#### 2️⃣ Configure o PostgreSQL
 
 ```sql
 CREATE DATABASE carteira_vacinacao_db;
-CREATE USER admin_vacinas WITH PASSWORD 'sua_senha';
-GRANT ALL PRIVILEGES ON DATABASE carteira_vacinacao_db TO admin_vacinas;
+CREATE USER dev_user WITH PASSWORD 'sua_senha';
+GRANT ALL PRIVILEGES ON DATABASE carteira_vacinacao_db TO dev_user;
 ```
 
-#### 3. Execute a aplicação com Maven
+#### 3️⃣ Configure o application.yml
+
+Edite `src/main/resources/application.yml` ou crie variáveis de ambiente:
 
 ```bash
+export SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/carteira_vacinacao_db
+export SPRING_DATASOURCE_USERNAME=dev_user
+export SPRING_DATASOURCE_PASSWORD=sua_senha
+export JWT_SECRET=sua_chave_secreta_jwt_minimo_32_caracteres
+```
+
+#### 4️⃣ Execute a aplicação
+
+```bash
+# Instalar dependências e executar
 mvn clean install
 mvn spring-boot:run
-```
 
-Ou usando o wrapper do Maven:
-```bash
+# Ou usando o Maven Wrapper
 ./mvnw clean install
 ./mvnw spring-boot:run
 ```
@@ -232,8 +380,14 @@ Após iniciar, a aplicação estará disponível em:
 
 - **API Base URL:** http://localhost:8080
 - **Swagger UI (Documentação):** http://localhost:8080/swagger-ui.html
-- **OpenAPI JSON:** http://localhost:8080/v3/api-docs
-- **Health Check:** http://localhost:8080/actuator/health
+- **API Info:** http://localhost:8080/api/v1/health
+- **Health Check (Actuator):** http://localhost:8080/actuator/health
+
+### Interface do Swagger UI
+
+A documentação interativa está disponível e pronta para testar todos os endpoints:
+
+![Swagger UI - Interface Principal](docs/images/swagger-ui.png)
 
 ---
 
@@ -317,62 +471,79 @@ Requisição HTTP
 ## 🔌 Principais Endpoints da API
 
 ### 🔓 Autenticação (Público)
-| Método | Endpoint          | Descrição                    |
-|--------|-------------------|------------------------------|
-| POST   | `/auth/register`  | Registrar novo usuário       |
-| POST   | `/auth/login`     | Autenticar e obter token JWT |
+| Método | Endpoint                  | Descrição                    |
+|--------|---------------------------|------------------------------|
+| POST   | `/api/v1/auth/register`   | Registrar novo usuário       |
+| POST   | `/api/v1/auth/login`      | Autenticar e obter token JWT |
 
 ### 🔐 Usuários (Autenticado)
-| Método | Endpoint              | Descrição                    |
-|--------|-----------------------|------------------------------|
-| GET    | `/api/usuarios`       | Listar todos os usuários     |
-| GET    | `/api/usuarios/{id}`  | Buscar usuário por ID        |
-| PUT    | `/api/usuarios/{id}`  | Atualizar usuário            |
-| DELETE | `/api/usuarios/{id}`  | Deletar usuário              |
+| Método | Endpoint                   | Descrição                    |
+|--------|----------------------------|------------------------------|
+| POST   | `/api/v1/usuarios`         | Criar usuário                |
+| GET    | `/api/v1/usuarios`         | Listar todos os usuários     |
+| GET    | `/api/v1/usuarios/{id}`    | Buscar usuário por ID        |
+| PUT    | `/api/v1/usuarios/{id}`    | Atualizar usuário            |
+| DELETE | `/api/v1/usuarios/{id}`    | Deletar usuário              |
 
 ### 👥 Pessoas (Autenticado)
-| Método | Endpoint             | Descrição                  |
-|--------|----------------------|----------------------------|
-| POST   | `/api/pessoas`       | Criar nova pessoa          |
-| GET    | `/api/pessoas`       | Listar todas as pessoas    |
-| GET    | `/api/pessoas/{id}`  | Buscar pessoa por ID       |
-| PUT    | `/api/pessoas/{id}`  | Atualizar pessoa           |
-| DELETE | `/api/pessoas/{id}`  | Deletar pessoa             |
+| Método | Endpoint                   | Descrição                     |
+|--------|----------------------------|-------------------------------|
+| POST   | `/api/v1/pessoas`          | Criar nova pessoa             |
+| GET    | `/api/v1/pessoas`          | Listar todas as pessoas       |
+| GET    | `/api/v1/pessoas/{id}`     | Buscar pessoa por ID          |
+| PUT    | `/api/v1/pessoas/{id}`     | Atualizar pessoa              |
+| DELETE | `/api/v1/pessoas/{id}`     | Deletar pessoa                |
+| GET    | `/api/v1/pessoas?cpf={cpf}&cns={cns}` | Buscar por CPF e CNS |
 
-### 💉 Vacinas (Autenticado)
-| Método | Endpoint            | Descrição                 |
-|--------|---------------------|---------------------------|
-| POST   | `/api/vacinas`      | Cadastrar nova vacina     |
-| GET    | `/api/vacinas`      | Listar todas as vacinas   |
-| GET    | `/api/vacinas/{id}` | Buscar vacina por ID      |
-| PUT    | `/api/vacinas/{id}` | Atualizar vacina          |
-| DELETE | `/api/vacinas/{id}` | Deletar vacina            |
+### 💉 Vacinas (Autenticado - Somente Leitura)
+| Método | Endpoint                         | Descrição                      |
+|--------|----------------------------------|--------------------------------|
+| GET    | `/api/v1/vacinas`                | Listar todas as vacinas        |
+| GET    | `/api/v1/vacinas/{id}`           | Buscar vacina por ID           |
+| GET    | `/api/v1/vacinas/{id}/esquemas`  | Listar esquemas vacinais       |
 
-### 🩺 Alergias (Autenticado)
-| Método | Endpoint             | Descrição                   |
-|--------|----------------------|-----------------------------|
-| POST   | `/api/alergias`      | Cadastrar nova alergia      |
-| GET    | `/api/alergias`      | Listar todas as alergias    |
-| GET    | `/api/alergias/{id}` | Buscar alergia por ID       |
-| PUT    | `/api/alergias/{id}` | Atualizar alergia           |
-| DELETE | `/api/alergias/{id}` | Deletar alergia             |
+> **Nota:** O catálogo de vacinas é gerenciado via migrations do Flyway (somente leitura)
+
+### 🩺 Alergias (Autenticado - Somente Leitura)
+| Método | Endpoint                    | Descrição                      |
+|--------|-----------------------------| -------------------------------|
+| GET    | `/api/v1/alergias`          | Listar todas as alergias       |
+| GET    | `/api/v1/alergias/{id}`     | Buscar alergia por ID          |
+| GET    | `/api/v1/alergias?ids={ids}` | Buscar alergias por IDs       |
+
+> **Nota:** O catálogo de alergias é gerenciado via migrations do Flyway (somente leitura)
 
 ### 📋 Registros Vacinais (Autenticado)
-| Método | Endpoint                     | Descrição                         |
-|--------|------------------------------|-----------------------------------|
-| POST   | `/api/registros-vacina`      | Registrar aplicação de vacina     |
-| GET    | `/api/registros-vacina`      | Listar todos os registros         |
-| GET    | `/api/registros-vacina/{id}` | Buscar registro por ID            |
-| PUT    | `/api/registros-vacina/{id}` | Atualizar registro                |
-| DELETE | `/api/registros-vacina/{id}` | Deletar registro                  |
+| Método | Endpoint                                          | Descrição                         |
+|--------|---------------------------------------------------|-----------------------------------|
+| POST   | `/api/v1/registros-vacina`                        | Registrar aplicação de vacina     |
+| GET    | `/api/v1/registros-vacina/{pessoaId}/calendario`  | Gerar calendário vacinal          |
+| GET    | `/api/v1/registros-vacina/{pessoaId}/historico`   | Listar histórico de vacinas       |
+| DELETE | `/api/v1/registros-vacina/{id}`                   | Deletar registro                  |
 
 ### 👨‍👩‍👧 Responsáveis (Autenticado)
-| Método | Endpoint                        | Descrição                         |
-|--------|---------------------------------|-----------------------------------|
-| POST   | `/api/responsaveis`             | Vincular responsável              |
-| GET    | `/api/responsaveis`             | Listar todos os responsáveis      |
-| GET    | `/api/responsaveis/{id}`        | Buscar responsável por ID         |
-| DELETE | `/api/responsaveis/{id}`        | Deletar vínculo                   |
+| Método | Endpoint                                 | Descrição                         |
+|--------|------------------------------------------|-----------------------------------|
+| POST   | `/api/v1/responsaveis`                   | Vincular responsável              |
+| GET    | `/api/v1/responsaveis/usuario/{usuarioId}` | Listar vínculos por usuário     |
+| GET    | `/api/v1/responsaveis/{id}`              | Buscar responsável por ID         |
+| PUT    | `/api/v1/responsaveis/{id}`              | Atualizar tipo de relação         |
+| DELETE | `/api/v1/responsaveis/{id}`              | Deletar vínculo                   |
+
+### 🔗 Alergias por Pessoa (Autenticado)
+| Método | Endpoint                                                | Descrição                        |
+|--------|----------------------------------------------------------|---------------------------------|
+| GET    | `/api/v1/pessoas/{pessoaId}/alergias`                    | Listar alergias da pessoa       |
+| POST   | `/api/v1/pessoas/{pessoaId}/alergias`                    | Vincular alergia                |
+| POST   | `/api/v1/pessoas/{pessoaId}/alergias/lote`               | Vincular múltiplas alergias     |
+| PUT    | `/api/v1/pessoas/{pessoaId}/alergias/{alergiaId}/observacao` | Atualizar observação       |
+| DELETE | `/api/v1/pessoas/{pessoaId}/alergias/{alergiaId}/observacao` | Deletar observação         |
+| DELETE | `/api/v1/pessoas/{pessoaId}/alergias/{alergiaId}`        | Deletar vínculo                 |
+
+### 🏥 Health Check (Público)
+| Método | Endpoint             | Descrição                    |
+|--------|----------------------|------------------------------|
+| GET    | `/api/v1/health`     | Verificar status da aplicação|
 
 > **Nota:** Para detalhes completos sobre requisições e respostas, acesse a documentação interativa no Swagger UI em http://localhost:8080/swagger-ui.html
 
@@ -424,32 +595,52 @@ Client-REST-testes/
 
 Acesse http://localhost:8080/swagger-ui.html e teste todos os endpoints de forma interativa.
 
+#### 1️⃣ Registrar novo usuário
+
+![Swagger UI - Endpoint de Registro](docs/images/swagger-ui%20register.png)
+
+#### 2️⃣ Fazer login e obter token JWT
+
+Após registrar, faça login para obter um token JWT válido:
+
+![Swagger UI - Login com Token](docs/images/swagger-ui%20login%20com%20token.png)
+
+#### 3️⃣ Acessar endpoints protegidos
+
+Use o token obtido no login para acessar os endpoints autenticados. O Swagger UI gerencia o token automaticamente.
+
+#### 4️⃣ Verificar informações da API
+
+Consulte o health check e informações gerais da aplicação:
+
+![Swagger UI - Informações da API](docs/images/swagger-ui%20Informações%20da%20API.png)
+
 ### Usando cURL
 
 #### Registrar usuário
 ```bash
-curl -X POST http://localhost:8080/auth/register \
+curl -X POST http://localhost:8080/api/v1/auth/register \
   -H "Content-Type: application/json" \
   -d '{
-    "nome": "João Silva",
+    "nomeCompleto": "João Silva",
     "email": "joao@example.com",
-    "senha": "senha123"
+    "senha": "Senha@123"
   }'
 ```
 
 #### Login
 ```bash
-curl -X POST http://localhost:8080/auth/login \
+curl -X POST http://localhost:8080/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "joao@example.com",
-    "senha": "senha123"
+    "senha": "Senha@123"
   }'
 ```
 
 #### Listar vacinas (com token)
 ```bash
-curl -X GET http://localhost:8080/api/vacinas \
+curl -X GET http://localhost:8080/api/v1/vacinas \
   -H "Authorization: Bearer SEU_TOKEN_JWT_AQUI"
 ```
 
@@ -494,6 +685,18 @@ k6/
 | **Stress**   | Encontrar o ponto de ruptura da API | 1→300 | 13min | Planejar capacidade máxima |
 | **Soak**     | Detectar vazamentos de memória | 20 | 15min | Validar estabilidade prolongada |
 
+### Resultados dos Testes
+
+Os testes de Load Test validam a capacidade da API sob carga realista:
+
+![k6 - Resultados Load Test (Carga Realista)](docs/images/K6%20resultados%20Load%20Test%20%28Carga%20Realista%29.png)
+
+**Interpretação dos resultados:**
+- ✅ **checks**: Validações bem-sucedidas de requisições
+- ✅ **http_req_duration**: Latência das requisições (P95 < 500ms é excelente)
+- ✅ **http_req_failed**: Taxa de erro das requisições (< 1% é ótimo)
+- ✅ **data_received/sent**: Volume de dados processados
+
 ### Pré-requisitos
 
 1. **Instalar k6:**
@@ -517,34 +720,62 @@ k6/
    docker-compose up -d
    ```
 
-3. **Criar usuário de teste:**
+3. **Criar usuário de teste e popular dados iniciais:**
+   
+   > ⚠️ **IMPORTANTE**: Os testes k6 requerem que você crie um usuário e faça login antes de executar. Use o script abaixo para configurar tudo automaticamente.
+   
    ```bash
+   # Script completo: Criar usuário → Login → Criar pessoa vinculada
+   # (Copie e cole todo o bloco no terminal)
+   
+   # 1. Registrar usuária Maria (padrão dos testes)
    curl -X POST http://localhost:8080/api/v1/auth/register \
      -H "Content-Type: application/json" \
      -d '{
-       "nome": "Teste k6",
-       "email": "teste@vacinacao.dev",
+       "nomeCompleto": "Maria da Silva",
+       "email": "maria.silva@vacinacao.dev",
        "senha": "Senha@123"
      }'
-   ```
-
-4. **Popular dados iniciais (opcional mas recomendado):**
-   ```bash
-   # Criar 1 pessoa vinculada ao usuário de teste
-   TOKEN=$(curl -s -X POST http://localhost:8080/api/v1/auth/login \
-     -H "Content-Type: application/json" \
-     -d '{"email":"teste@vacinacao.dev","senha":"Senha@123"}' | jq -r '.token')
    
+   # 2. Fazer login e obter token (Fish shell)
+   set TOKEN (curl -s -X POST http://localhost:8080/api/v1/auth/login \
+     -H "Content-Type: application/json" \
+     -d '{"email":"maria.silva@vacinacao.dev","senha":"Senha@123"}' | jq -r '.token')
+   
+   # 3. Criar pessoa vinculada (para popular dados iniciais)
    curl -X POST http://localhost:8080/api/v1/pessoas \
      -H "Content-Type: application/json" \
      -H "Authorization: Bearer $TOKEN" \
      -d '{
-       "nome": "João da Silva",
+       "nomeCompleto": "Ana Clara Silva",
        "cpf": "12345678901",
        "cns": "123456789012345",
-       "dataNascimento": "2015-06-15",
-       "sexo": "M"
+       "dataNascimento": "2020-01-01",
+       "nomeMae": "Maria da Silva",
+       "tipoRelacao": "MAE"
      }'
+   
+   echo "✅ Setup concluído! Usuária Maria criada e pessoa Ana cadastrada."
+   ```
+   
+   **Para Bash/Zsh:**
+   ```bash
+   # Registrar usuária
+   curl -X POST http://localhost:8080/api/v1/auth/register \
+     -H "Content-Type: application/json" \
+     -d '{"nomeCompleto":"Maria da Silva","email":"maria.silva@vacinacao.dev","senha":"Senha@123"}'
+   
+   # Login + Criar pessoa
+   TOKEN=$(curl -s -X POST http://localhost:8080/api/v1/auth/login \
+     -H "Content-Type: application/json" \
+     -d '{"email":"maria.silva@vacinacao.dev","senha":"Senha@123"}' | jq -r '.token')
+   
+   curl -X POST http://localhost:8080/api/v1/pessoas \
+     -H "Content-Type: application/json" \
+     -H "Authorization: Bearer $TOKEN" \
+     -d '{"nomeCompleto":"Ana Clara Silva","cpf":"12345678901","cns":"123456789012345","dataNascimento":"2020-01-01","nomeMae":"Maria da Silva","tipoRelacao":"MAE"}'
+   
+   echo "✅ Setup concluído!"
    ```
 
 ### Executar Testes
@@ -552,7 +783,7 @@ k6/
 #### Smoke Test (Validação Rápida)
 ```bash
 k6 run --env BASE_URL=http://localhost:8080 \
-       --env TEST_USER_EMAIL=teste@vacinacao.dev \
+       --env TEST_USER_EMAIL=maria.silva@vacinacao.dev \
        --env TEST_USER_PASSWORD=Senha@123 \
        k6/smoke.test.js
 ```
@@ -560,7 +791,7 @@ k6 run --env BASE_URL=http://localhost:8080 \
 #### Load Test (Carga Realista)
 ```bash
 k6 run --env BASE_URL=http://localhost:8080 \
-       --env TEST_USER_EMAIL=teste@vacinacao.dev \
+       --env TEST_USER_EMAIL=maria.silva@vacinacao.dev \
        --env TEST_USER_PASSWORD=Senha@123 \
        k6/load.test.js
 ```
@@ -568,7 +799,7 @@ k6 run --env BASE_URL=http://localhost:8080 \
 #### Stress Test (Ponto de Ruptura)
 ```bash
 k6 run --env BASE_URL=http://localhost:8080 \
-       --env TEST_USER_EMAIL=teste@vacinacao.dev \
+       --env TEST_USER_EMAIL=maria.silva@vacinacao.dev \
        --env TEST_USER_PASSWORD=Senha@123 \
        k6/stress.test.js
 ```
@@ -576,7 +807,7 @@ k6 run --env BASE_URL=http://localhost:8080 \
 #### Soak Test (Estabilidade 15min)
 ```bash
 k6 run --env BASE_URL=http://localhost:8080 \
-       --env TEST_USER_EMAIL=teste@vacinacao.dev \
+       --env TEST_USER_EMAIL=maria.silva@vacinacao.dev \
        --env TEST_USER_PASSWORD=Senha@123 \
        k6/soak.test.js
 ```
@@ -621,6 +852,50 @@ O relatório HTML contém:
 | `http_reqs` | Total de requisições HTTP executadas | - |
 | `iteration_duration` | Tempo para completar um ciclo completo de testes | - |
 | `vus` | Virtual Users (usuários simultâneos) | - |
+
+### Outras Opções de Teste
+
+Além dos testes de performance com k6, você pode testar os endpoints da API rapidamente usando:
+
+#### 🚀 **Postman Collection** (GUI)
+Importe a collection completa no Postman para testar todos os endpoints com interface gráfica:
+
+```
+Client-REST-testes/carteira-vacinacao.postman_collection.json
+```
+
+**Recursos incluídos:**
+- ✅ 33 requisições organizadas em 6 pastas (Auth, Pessoas, Vacinas, Registros, Alergias, Consultas)
+- ✅ Captura automática de token JWT após login
+- ✅ Exemplos de usuários: Maria e João com dados completos
+- ✅ Fluxo completo: Cadastro → Login → CRUD de pessoas, vacinas e registros
+
+**Como usar:**
+1. Abra o Postman
+2. Importe o arquivo `carteira-vacinacao.postman_collection.json`
+3. Execute a pasta "Auth" para criar usuário e fazer login
+4. Os demais endpoints já terão o token configurado automaticamente
+
+#### 📄 **REST Client (.http)** (VS Code)
+Para testes rápidos direto no VS Code com a extensão [REST Client](https://marketplace.visualstudio.com/items?itemName=humao.rest-client):
+
+```
+Client-REST-testes/teste-validacao.http
+```
+
+**Recursos incluídos:**
+- ✅ Arquivo `.http` com todos os endpoints documentados
+- ✅ Comentários explicativos em cada requisição
+- ✅ Fluxo completo passo a passo com variáveis dinâmicas
+- ✅ Captura automática de token e IDs para requisições subsequentes
+
+**Como usar:**
+1. Instale a extensão **REST Client** no VS Code
+2. Abra o arquivo `teste-validacao.http`
+3. Clique em **"Send Request"** acima de cada requisição HTTP
+4. Os resultados aparecem em uma aba lateral do VS Code
+
+> 💡 **Dica**: Use o Postman para exploração interativa, `.http` para testes rápidos durante desenvolvimento, e k6 para validar performance sob carga.
 
 ### Otimizações Implementadas
 
@@ -871,10 +1146,18 @@ EER Diagram/
 
 - **Instruções de Camadas:** `.github/instructions/`
 - **Comandos Úteis Docker:** `docker/COMANDOS-UTEIS.md`
+- **Guia de Publicação DockerHub:** `docker/DOCKERHUB_PUBLISH_GUIDE.md`
 - **Diagrama EER:** `EER Diagram/README.md`
 - **Exemplos de Requisições:** `Client REST testes/`
 - **Testes de Performance (k6):** `k6/` (Smoke, Load, Stress, Soak)
 - **Relatórios HTML de Testes:** `k6/results/summary.html` (gerado automaticamente)
+
+### 🐳 Recursos Docker
+
+- **DockerHub:** [moisevndev/carteira-vacinacao-api](https://hub.docker.com/r/moisevndev/carteira-vacinacao-api)
+- **GitHub Container Registry:** Em breve
+- **Docker Compose (Produção):** `docker-compose.dockerhub.yml`
+- **Docker Compose (Desenvolvimento):** `docker-compose.yml`
 
 ---
 

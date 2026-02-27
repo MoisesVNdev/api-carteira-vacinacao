@@ -38,6 +38,15 @@ LICENSE
 *.md
 docs/
 
+# Scripts e documentação Docker (não necessários na imagem)
+docker/*.md
+docker/*.sh
+docker/COMANDOS-UTEIS.md
+docker/DOCKERHUB_PUBLISH_GUIDE.md
+docker/DOCKERHUB_README.md
+docker/PASSO_A_PASSO_DOCKERHUB.md
+docker/build-and-push.sh
+
 # ----------------------------------------------------------------------------
 # MAVEN
 # ----------------------------------------------------------------------------

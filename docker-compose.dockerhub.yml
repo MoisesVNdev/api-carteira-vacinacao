@@ -1,0 +1,144 @@
+# ============================================================================
+# DOCKER COMPOSE - USO DA IMAGEM DO DOCKERHUB
+# ============================================================================
+# Este arquivo é um EXEMPLO para usuários que querem usar sua imagem
+# publicada no DockerHub SEM precisar do código-fonte.
+#
+# INSTRUÇÕES PARA USUÁRIOS:
+# 1. Copie este arquivo para seu projeto
+# 2. Crie um arquivo .env com as credenciais (veja .env.example)
+# 3. Execute: docker-compose -f docker-compose.dockerhub.yml up -d
+# ============================================================================
+
+services:
+  # ==========================================================================
+  # SERVIÇO: POSTGRESQL 16 ALPINE
+  # ==========================================================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: carteira-vacinacao-postgres
+    restart: unless-stopped
+    
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-carteira_vacinacao_db}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD é obrigatório}
+      TZ: ${TZ:-America/Sao_Paulo}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=pt_BR.UTF-8"
+    
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-carteira_vacinacao_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    
+    networks:
+      - app-network
+
+  # ==========================================================================
+  # SERVIÇO: API SPRING BOOT (IMAGEM DO DOCKERHUB)
+  # ==========================================================================
+  app:
+    # -----------------------------------------------------------------------
+    # IMPORTANTE: Esta é a imagem PUBLICADA no DockerHub
+    # Os usuários NÃO precisam do código-fonte ou fazer build!
+    # -----------------------------------------------------------------------
+    image: moisevndev/carteira-vacinacao-api:latest
+    
+    container_name: carteira-vacinacao-api
+    restart: unless-stopped
+    
+    depends_on:
+      postgres:
+        condition: service_healthy
+    
+    environment:
+      # Perfil Spring
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILE:-prod}
+      
+      # Banco de dados
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-carteira_vacinacao_db}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD é obrigatório}
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      
+      # JPA/Hibernate (Flyway gerencia o schema)
+      SPRING_JPA_HIBERNATE_DDL_AUTO: ${JPA_DDL_AUTO:-none}
+      SPRING_JPA_SHOW_SQL: ${JPA_SHOW_SQL:-false}
+      SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL: true
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
+      
+      # Timezone
+      TZ: ${TZ:-America/Sao_Paulo}
+      
+      # JVM Options
+      JAVA_OPTS: >
+        -Xms256m
+        -Xmx512m
+        -XX:+UseG1GC
+        -XX:MaxGCPauseMillis=200
+      
+      # Pool de conexões
+      SPRING_DATASOURCE_HIKARI_MAXIMUMPOOLSIZE: 20
+      SPRING_DATASOURCE_HIKARI_MINIMUMIDLE: 5
+      
+      # JWT (IMPORTANTE: Altere estas variáveis!)
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET é obrigatório}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
+    
+    ports:
+      - "${APP_PORT:-8080}:8080"
+    
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    
+    networks:
+      - app-network
+
+# ============================================================================
+# VOLUMES
+# ============================================================================
+volumes:
+  postgres_data:
+    driver: local
+    name: carteira_vacinacao_postgres_data
+
+# ============================================================================
+# REDES
+# ============================================================================
+networks:
+  app-network:
+    driver: bridge
+    name: carteira_vacinacao_network
+
+# ============================================================================
+# COMANDOS ÚTEIS
+# ============================================================================
+# 
+# Subir os serviços:
+# docker-compose -f docker-compose.dockerhub.yml up -d
+#
+# Ver logs:
+# docker-compose -f docker-compose.dockerhub.yml logs -f
+#
+# Parar os serviços:
+# docker-compose -f docker-compose.dockerhub.yml down
+#
+# Parar e remover volumes (CUIDADO: apaga o banco!):
+# docker-compose -f docker-compose.dockerhub.yml down -v
+#
+# Atualizar para versão mais recente:
+# docker-compose -f docker-compose.dockerhub.yml pull
+# docker-compose -f docker-compose.dockerhub.yml up -d
+# ============================================================================
