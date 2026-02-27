@@ -8,7 +8,7 @@ O projeto não tem o objetivo de substituir a carteira de vacinação física, m
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.0.3-brightgreen?logo=spring)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue?logo=postgresql)
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker)
-![DockerHub](https://img.shields.io/docker/v/moisevndev/carteira-vacinacao-api?label=DockerHub&logo=docker)
+![DockerHub](https://img.shields.io/docker/v/moisesvn/carteira-vacinacao-api?label=DockerHub&logo=docker)
 ![k6](https://img.shields.io/badge/k6-Performance_Tested-7D64FF?logo=k6)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 
