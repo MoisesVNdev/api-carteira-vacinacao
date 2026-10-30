@@ -14,6 +14,11 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.H2Dialect
 
+# Segredo usado só nos testes (nunca use este valor fora deles)
+jwt:
+  secret: dGVzdGUtc29tZW50ZS1jaGF2ZS1qd3QtcGFyYS1vcy10ZXN0ZXMtYXV0b21hdGl6YWRvcy0yNTZiaXRz
+  expiration: 3600000
+
 # Reduce logging noise during tests
 logging:
   level:
