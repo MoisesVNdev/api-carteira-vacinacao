@@ -21,7 +21,7 @@ Este guia mostra como publicar sua API no DockerHub seguindo as melhores prátic
 
 1. Acesse: https://hub.docker.com/
 2. Clique em **Sign Up**
-3. Escolha um username (ex: `moisesvndev`)
+3. Escolha um username (ex: `moisesvn`)
 4. Verifique seu email
 
 ### 1.2 Criar Access Token (Mais Seguro que Senha)
@@ -65,7 +65,7 @@ trivy --version
 
 ```bash
 # Login usando o token (recomendado)
-docker login -u moisesvndev
+docker login -u moisesvn
 
 # Cole o token quando solicitado
 # NÃO digite a senha da conta!
@@ -74,13 +74,13 @@ docker login -u moisesvndev
 Ou use variável de ambiente:
 
 ```bash
-echo $DOCKERHUB_TOKEN | docker login -u moisesvndev --password-stdin
+echo $DOCKERHUB_TOKEN | docker login -u moisesvn --password-stdin
 ```
 
 Verificar login:
 ```bash
 docker info | grep Username
-# Saída: Username: moisesvndev
+# Saída: Username: moisesvn
 ```
 
 ### 2.2 Testar Build Local
@@ -190,7 +190,7 @@ O script vai:
 
 ### 2.4 Verificar no DockerHub
 
-1. Acesse: https://hub.docker.com/r/moisesvndev/carteira-vacinacao-api
+1. Acesse: https://hub.docker.com/r/moisesvn/carteira-vacinacao-api
 2. Verifique:
    - ✅ Tags criadas (latest, 1.0.0, 1.0, 1)
    - ✅ Tamanho da imagem
@@ -203,7 +203,7 @@ O script vai:
 
 ### 3.1 Adicionar Secrets no GitHub
 
-1. Acesse seu repositório: https://github.com/MoisesVNdev/api-carteira-vacinacao
+1. Acesse seu repositório: https://github.com/moisesvn/api-carteira-vacinacao
 2. Vá para: **Settings** → **Secrets and variables** → **Actions**
 3. Clique em **New repository secret**
 
@@ -211,7 +211,7 @@ Adicione 2 secrets:
 
 **Secret 1:**
 - Name: `DOCKERHUB_USERNAME`
-- Value: `moisesvndev`
+- Value: `moisesvn`
 
 **Secret 2:**
 - Name: `DOCKERHUB_TOKEN`
@@ -246,14 +246,14 @@ git push origin v1.0.0
 
 **Opção C: Executar manualmente**
 
-1. Vá para: https://github.com/MoisesVNdev/api-carteira-vacinacao/actions
+1. Vá para: https://github.com/moisesvn/api-carteira-vacinacao/actions
 2. Clique em **Docker Build and Publish**
 3. Clique em **Run workflow**
 4. Escolha a branch e execute
 
 ### 3.4 Acompanhar Execução
 
-1. Acesse: https://github.com/MoisesVNdev/api-carteira-vacinacao/actions
+1. Acesse: https://github.com/moisesvn/api-carteira-vacinacao/actions
 2. Clique no workflow em execução
 3. Acompanhe os logs em tempo real
 4. Verifique o resumo ao final
@@ -295,7 +295,7 @@ git push origin v1.1.0
 
 ### 4.3 Criar Release no GitHub
 
-1. Acesse: https://github.com/MoisesVNdev/api-carteira-vacinacao/releases
+1. Acesse: https://github.com/moisesvn/api-carteira-vacinacao/releases
 2. Clique em **Draft a new release**
 3. Escolha a tag: `v1.1.0`
 4. Release title: `v1.1.0 - Relatórios e Melhorias`
@@ -314,14 +314,14 @@ git push origin v1.1.0
 
 ### 📦 Docker
 \`\`\`bash
-docker pull moisesvndev/carteira-vacinacao-api:1.1.0
+docker pull moisesvn/carteira-vacinacao-api:1.1.0
 \`\`\`
 
 ### 📋 Breaking Changes
 Nenhuma mudança incompatível.
 
 ---
-**Full Changelog**: https://github.com/MoisesVNdev/api-carteira-vacinacao/compare/v1.0.0...v1.1.0
+**Full Changelog**: https://github.com/moisesvn/api-carteira-vacinacao/compare/v1.0.0...v1.1.0
 ```
 
 6. Clique em **Publish release**
@@ -334,13 +334,13 @@ Nenhuma mudança incompatível.
 
 O workflow já escaneia com Trivy. Para ver resultados:
 
-1. Acesse: https://github.com/MoisesVNdev/api-carteira-vacinacao/security
+1. Acesse: https://github.com/moisesvn/api-carteira-vacinacao/security
 2. Clique em **Code scanning**
 3. Veja vulnerabilidades encontradas
 
 ### 5.2 DockerHub Automated Security Scans
 
-1. Acesse: https://hub.docker.com/r/moisesvndev/carteira-vacinacao-api/general
+1. Acesse: https://hub.docker.com/r/moisesvn/carteira-vacinacao-api/general
 2. Ative **Advanced Image Analysis**
 3. Veja relatório de vulnerabilidades
 
@@ -349,19 +349,19 @@ O workflow já escaneia com Trivy. Para ver resultados:
 Adicione badges para mostrar qualidade:
 
 ```markdown
-![Docker Image Size](https://img.shields.io/docker/image-size/moisesvndev/carteira-vacinacao-api/latest)
-![Docker Pulls](https://img.shields.io/docker/pulls/moisesvndev/carteira-vacinacao-api)
-![Docker Build](https://github.com/MoisesVNdev/api-carteira-vacinacao/workflows/Docker%20Build%20and%20Publish/badge.svg)
+![Docker Image Size](https://img.shields.io/docker/image-size/moisesvn/carteira-vacinacao-api/latest)
+![Docker Pulls](https://img.shields.io/docker/pulls/moisesvn/carteira-vacinacao-api)
+![Docker Build](https://github.com/moisesvn/api-carteira-vacinacao/workflows/Docker%20Build%20and%20Publish/badge.svg)
 ```
 
 ### 5.4 Monitorar Downloads
 
 ```bash
 # Ver estatísticas localmente
-curl -s https://hub.docker.com/v2/repositories/moisesvndev/carteira-vacinacao-api/ | jq '.pull_count'
+curl -s https://hub.docker.com/v2/repositories/moisesvn/carteira-vacinacao-api/ | jq '.pull_count'
 ```
 
-Ou acesse: https://hub.docker.com/r/moisesvndev/carteira-vacinacao-api/tags
+Ou acesse: https://hub.docker.com/r/moisesvn/carteira-vacinacao-api/tags
 
 ---
 
@@ -384,10 +384,10 @@ Ou acesse: https://hub.docker.com/r/moisesvndev/carteira-vacinacao-api/tags
 
 ```bash
 # CUIDADO: Isso é irreversível!
-docker rmi moisesvndev/carteira-vacinacao-api:old-tag
+docker rmi moisesvn/carteira-vacinacao-api:old-tag
 
 # No DockerHub (via web):
-# 1. Acesse https://hub.docker.com/r/moisesvndev/carteira-vacinacao-api/tags
+# 1. Acesse https://hub.docker.com/r/moisesvn/carteira-vacinacao-api/tags
 # 2. Clique no ícone de lixeira na tag desejada
 ```
 
@@ -399,12 +399,12 @@ Edite o arquivo `docker/DOCKERHUB_README.md` e faça push. O CI/CD atualiza auto
 
 ```bash
 # Usuários podem voltar para versão anterior:
-docker pull moisesvndev/carteira-vacinacao-api:1.0.0
+docker pull moisesvn/carteira-vacinacao-api:1.0.0
 
 # Ou criar nova tag apontando para versão antiga:
-docker pull moisesvndev/carteira-vacinacao-api:1.0.0
-docker tag moisesvndev/carteira-vacinacao-api:1.0.0 moisesvndev/carteira-vacinacao-api:latest
-docker push moisesvndev/carteira-vacinacao-api:latest
+docker pull moisesvn/carteira-vacinacao-api:1.0.0
+docker tag moisesvn/carteira-vacinacao-api:1.0.0 moisesvn/carteira-vacinacao-api:latest
+docker push moisesvn/carteira-vacinacao-api:latest
 ```
 
 ---
@@ -479,7 +479,7 @@ Seguindo este guia, você terá:
 **Solução:**
 ```bash
 docker logout
-docker login -u moisesvndev
+docker login -u moisesvn
 # Cole o access token
 ```
 
@@ -503,7 +503,7 @@ docker run -d --name postgres \
 # Solução 3: Usar --link ao rodar a API
 docker run --link postgres:postgres \
   -e SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/... \
-  moisesvndev/carteira-vacinacao-api:latest
+  moisesvn/carteira-vacinacao-api:latest
 ```
 
 ### Erro: "no space left on device"
