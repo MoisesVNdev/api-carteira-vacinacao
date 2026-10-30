@@ -64,7 +64,9 @@ bin/
 # ----------------------------------------------------------------------------
 # VISUAL STUDIO CODE
 # ----------------------------------------------------------------------------
-.github/
+# Instruções do Copilot ficam fora do repositório, mas .github/workflows (CI) deve ser versionado
+.github/copilot-instructions.md
+.github/instructions/
 .copilot-workspace/
 .history/
 .vscode/
