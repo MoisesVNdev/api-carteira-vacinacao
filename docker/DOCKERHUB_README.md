@@ -24,7 +24,7 @@ JWT_EXPIRATION=86400000
 EOF
 
 # 2. Criar docker-compose.yml
-curl -O https://raw.githubusercontent.com/MoisesVNdev/api-carteira-vacinacao/main/docker-compose.dockerhub.yml
+curl -O https://raw.githubusercontent.com/moisesvn/api-carteira-vacinacao/main/docker-compose.dockerhub.yml
 
 # 3. Executar
 docker-compose -f docker-compose.dockerhub.yml up -d
@@ -52,7 +52,7 @@ docker run -d \
   -e JWT_SECRET=sua_chave_secreta_jwt_minimo_32_caracteres \
   -e SPRING_PROFILES_ACTIVE=prod \
   -p 8080:8080 \
-  moisevndev/carteira-vacinacao-api:latest
+  moisesvn/carteira-vacinacao-api:latest
 ```
 
 ---
@@ -176,29 +176,26 @@ Resposta esperada:
 
 ## 🏷️ Tags Disponíveis
 
-- `latest` - Versão mais recente (branch main)
-- `develop` - Versão de desenvolvimento
-- `1.x.x` - Versões específicas (semantic versioning)
-- `sha-xxxxxxx` - Builds por commit SHA
+- `latest` - Versão mais recente
+- `1.0.0`, `1.0`, `1` - Versões específicas (semantic versioning)
+
+Todas as tags são multi-arquitetura: `linux/amd64` e `linux/arm64`.
 
 ### Exemplos
 
 ```bash
 # Última versão estável
-docker pull moisevndev/carteira-vacinacao-api:latest
+docker pull moisesvn/carteira-vacinacao-api:latest
 
 # Versão específica
-docker pull moisevndev/carteira-vacinacao-api:1.0.0
-
-# Versão de desenvolvimento
-docker pull moisevndev/carteira-vacinacao-api:develop
+docker pull moisesvn/carteira-vacinacao-api:1.0.0
 ```
 
 ---
 
 ## 📚 Documentação Completa
 
-- **GitHub:** [MoisesVNdev/api-carteira-vacinacao](https://github.com/MoisesVNdev/api-carteira-vacinacao)
+- **GitHub:** [moisesvn/api-carteira-vacinacao](https://github.com/moisesvn/api-carteira-vacinacao)
 - **README:** Documentação completa com exemplos
 - **Swagger UI:** Disponível em `/swagger-ui.html` após iniciar
 - **Testes REST:** Collection Postman disponível no repositório
@@ -209,14 +206,14 @@ docker pull moisevndev/carteira-vacinacao-api:develop
 
 Encontrou um bug ou tem uma sugestão?
 
-- **Issues:** [GitHub Issues](https://github.com/MoisesVNdev/api-carteira-vacinacao/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/MoisesVNdev/api-carteira-vacinacao/discussions)
+- **Issues:** [GitHub Issues](https://github.com/moisesvn/api-carteira-vacinacao/issues)
+- **Discussions:** [GitHub Discussions](https://github.com/moisesvn/api-carteira-vacinacao/discussions)
 
 ---
 
 ## 📄 Licença
 
-Este projeto está sob a licença MIT. Veja o [LICENSE](https://github.com/MoisesVNdev/api-carteira-vacinacao/blob/main/LICENSE) para mais detalhes.
+Este projeto está sob a licença MIT. Veja o [LICENSE](https://github.com/moisesvn/api-carteira-vacinacao/blob/main/LICENSE) para mais detalhes.
 
 ---
 
@@ -224,7 +221,7 @@ Este projeto está sob a licença MIT. Veja o [LICENSE](https://github.com/Moise
 
 **Moisés Vila Nova de Oliveira**
 
-- GitHub: [@MoisesVNdev](https://github.com/MoisesVNdev)
+- GitHub: [@moisesvn](https://github.com/moisesvn)
 - LinkedIn: [moisesvnoliveira](https://www.linkedin.com/in/moisesvnoliveira/)
 - Email: moisesvn.dev@gmail.com
 
@@ -236,4 +233,4 @@ Esta aplicação é uma **ferramenta de apoio** para controle vacinal familiar. 
 
 ---
 
-**🌟 Se este projeto foi útil, deixe uma estrela no [GitHub](https://github.com/MoisesVNdev/api-carteira-vacinacao)!**
+**🌟 Se este projeto foi útil, deixe uma estrela no [GitHub](https://github.com/moisesvn/api-carteira-vacinacao)!**
