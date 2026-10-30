@@ -9,7 +9,6 @@ import com.moisesvn.carteira_vacinacao_api.model.*;
 import com.moisesvn.carteira_vacinacao_api.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,8 +35,7 @@ public class RegistroVacinaService {
     private final RegistroVacinaRepository registroVacinaRepository;
     private final EsquemaVacinalRepository esquemaVacinalRepository;
     private final PessoaRepository pessoaRepository;
-    private final ResponsavelRepository responsavelRepository;
-    private final UsuarioRepository usuarioRepository;
+    private final AcessoService acessoService;
 
     /**
      * Retorna o calendário vacinal personalizado de uma pessoa.
@@ -225,17 +223,7 @@ public class RegistroVacinaService {
      * @throws UsuarioNaoEncontradoException se o usuário autenticado não é encontrado
      */
     private void validarPosseDaPessoa(Long pessoaId) {
-        String emailAutenticado = SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getName();
-        
-        Usuario usuario = usuarioRepository.findByEmail(emailAutenticado)
-                .orElseThrow(() -> new UsuarioNaoEncontradoException("Usuário autenticado não encontrado"));
-        
-        if (!responsavelRepository.existsByUsuarioIdAndPessoaId(usuario.getId(), pessoaId)) {
-            log.warn("Acesso negado. Pessoa ID {} não pertence ao usuário ID {}", pessoaId, usuario.getId());
-            throw new PessoaNaoPertenceAoUsuarioException(pessoaId);
-        }
+        acessoService.validarPosseDaPessoa(pessoaId);
     }
 
     /**
