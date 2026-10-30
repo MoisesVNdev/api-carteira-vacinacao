@@ -553,6 +553,7 @@ Content-Type: application/json
 
 {
   "pessoaId": {{anaId}},
+  "cns": "898001160000000",
   "tipoRelacao": "FILHA"
 }
 
