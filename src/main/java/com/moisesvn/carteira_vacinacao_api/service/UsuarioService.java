@@ -23,6 +23,7 @@ public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AcessoService acessoService;
 
     /**
      * Cria um novo usuário validando unicidade de email.
@@ -34,7 +35,7 @@ public class UsuarioService {
      */
     @Transactional
     public UsuarioResponseDTO criar(UsuarioRequestDTO dto) {
-        log.info("Criando novo usuário com email: {}", dto.getEmail());
+        log.info("Criando novo usuário");
         if (usuarioRepository.existsByEmail(dto.getEmail())) {
             throw new EmailJaCadastradoException(dto.getEmail());
         }
@@ -47,16 +48,15 @@ public class UsuarioService {
     }
 
     /**
-     * Lista todos os usuários cadastrados.
+     * Lista os usuários visíveis para o usuário autenticado.
+     * Por privacidade, retorna apenas a própria conta.
      *
-     * @return Lista de usuários em formato DTO
+     * @return Lista com o usuário autenticado
      */
     @Transactional(readOnly = true)
     public List<UsuarioResponseDTO> listarTodos() {
-        log.debug("Listando todos os usuários");
-        return usuarioRepository.findAll().stream()
-                .map(this::toResponseDTO)
-                .collect(Collectors.toList());
+        log.debug("Listando usuários (apenas o próprio)");
+        return List.of(toResponseDTO(acessoService.usuarioAutenticado()));
     }
 
     /**
@@ -69,6 +69,7 @@ public class UsuarioService {
     @Transactional(readOnly = true)
     public UsuarioResponseDTO buscarPorId(Long id) {
         log.debug("Buscando usuário por id: {}", id);
+        acessoService.validarProprioUsuario(id);
         return toResponseDTO(buscarEntidadePorId(id));
     }
 
@@ -83,6 +84,7 @@ public class UsuarioService {
     @Transactional
     public UsuarioResponseDTO atualizar(Long id, UsuarioUpdateRequestDTO dto) {
         log.info("Atualizando usuário com id: {}", id);
+        acessoService.validarProprioUsuario(id);
         Usuario usuario = buscarEntidadePorId(id);
         usuario.setNomeCompleto(dto.getNomeCompleto());
         return toResponseDTO(usuarioRepository.save(usuario));
@@ -97,6 +99,7 @@ public class UsuarioService {
     @Transactional
     public void excluir(Long id) {
         log.info("Deletando usuário com id: {}", id);
+        acessoService.validarProprioUsuario(id);
         if (!usuarioRepository.existsById(id)) {
             throw new UsuarioNaoEncontradoException(id);
         }
