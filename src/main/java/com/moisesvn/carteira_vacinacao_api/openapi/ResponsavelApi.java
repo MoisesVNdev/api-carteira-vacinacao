@@ -98,7 +98,8 @@ public interface ResponsavelApi {
     @Operation(
         summary = "Criar novo vínculo de responsável",
         description = "Vincula uma pessoa já existente ao usuário autenticado como um novo responsável. "
-            + "Útil para vincular dependentes já cadastrados. O usuário é extraído automaticamente do JWT."
+            + "Útil para vincular dependentes já cadastrados. O usuário é extraído automaticamente do JWT. "
+            + "O CNS da pessoa é obrigatório e precisa conferir com o cadastro."
     )
     @ApiResponses({
         @ApiResponse(responseCode = "201", description = "Vínculo criado com sucesso.",
@@ -122,6 +123,17 @@ public interface ResponsavelApi {
                       "status": 401,
                       "erro": "TokenInvalidoException",
                       "mensagem": "Token JWT inválido ou expirado",
+                      "caminho": "/api/v1/responsaveis"
+                    }
+                    """))),
+        @ApiResponse(responseCode = "403", description = "CNS não confere com a pessoa informada.",
+            content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class),
+                examples = @ExampleObject(value = """
+                    {
+                      "timestamp": "2026-02-25T20:35:00",
+                      "status": 403,
+                      "erro": "AccessDeniedException",
+                      "mensagem": "Acesso negado",
                       "caminho": "/api/v1/responsaveis"
                     }
                     """))),
