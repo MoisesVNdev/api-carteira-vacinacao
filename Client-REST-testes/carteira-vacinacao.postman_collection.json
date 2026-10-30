@@ -896,7 +896,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"pessoaId\": {{anaId}},\n  \"tipoRelacao\": \"FILHA\"\n}",
+              "raw": "{\n  \"pessoaId\": {{anaId}},\n  \"cns\": \"898001160000000\",\n  \"tipoRelacao\": \"FILHA\"\n}",
               "options": { "raw": { "language": "json" } }
             },
             "url": {
