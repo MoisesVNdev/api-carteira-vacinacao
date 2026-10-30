@@ -36,6 +36,7 @@ public class PessoaAlergiaService {
     private final PessoaAlergiaRepository pessoaAlergiaRepository;
     private final AlergiaRepository alergiaRepository;
     private final PessoaRepository pessoaRepository;
+    private final AcessoService acessoService;
 
     /**
      * Lista todas as alergias vinculadas a uma pessoa.
@@ -45,6 +46,8 @@ public class PessoaAlergiaService {
      */
     @Transactional(readOnly = true)
     public List<PessoaAlergiaResponseDTO> findByPessoa(Long pessoaId) {
+        acessoService.validarPosseDaPessoa(pessoaId);
+
         log.debug("Listando alergias da pessoa ID: {}", pessoaId);
         
         // Valida se pessoa existe
@@ -69,6 +72,8 @@ public class PessoaAlergiaService {
      */
     @Transactional
     public PessoaAlergiaResponseDTO create(Long pessoaId, PessoaAlergiaRequestDTO dto) {
+        acessoService.validarPosseDaPessoa(pessoaId);
+
         log.info("Vinculando alergia ID {} à pessoa ID {}", dto.alergiaId(), pessoaId);
         
         // Valida pessoa
@@ -115,6 +120,8 @@ public class PessoaAlergiaService {
      */
     @Transactional
     public List<PessoaAlergiaResponseDTO> createBatch(Long pessoaId, List<PessoaAlergiaListRequestItem> items) {
+        acessoService.validarPosseDaPessoa(pessoaId);
+
         log.info("Vinculando {} alergias à pessoa ID {} (batch)", items.size(), pessoaId);
         
         // Valida pessoa
@@ -169,6 +176,8 @@ public class PessoaAlergiaService {
             Long pessoaId,
             Long alergiaId,
             PessoaAlergiaObservacaoRequestDTO dto) {
+        acessoService.validarPosseDaPessoa(pessoaId);
+
         
         log.info("Atualizando observação do vínculo. Pessoa ID: {}, Alergia ID: {}", 
                  pessoaId, alergiaId);
@@ -195,6 +204,8 @@ public class PessoaAlergiaService {
      */
     @Transactional
     public void deleteObservacao(Long pessoaId, Long alergiaId) {
+        acessoService.validarPosseDaPessoa(pessoaId);
+
         log.info("Removendo observação do vínculo. Pessoa ID: {}, Alergia ID: {}", 
                  pessoaId, alergiaId);
         
@@ -218,6 +229,8 @@ public class PessoaAlergiaService {
      */
     @Transactional
     public void delete(Long pessoaId, Long alergiaId) {
+        acessoService.validarPosseDaPessoa(pessoaId);
+
         log.info("Removendo vínculo de alergia. Pessoa ID: {}, Alergia ID: {}", 
                  pessoaId, alergiaId);
         
