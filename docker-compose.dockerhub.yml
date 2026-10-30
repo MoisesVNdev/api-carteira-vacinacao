@@ -50,7 +50,7 @@ services:
     # IMPORTANTE: Esta é a imagem PUBLICADA no DockerHub
     # Os usuários NÃO precisam do código-fonte ou fazer build!
     # -----------------------------------------------------------------------
-    image: moisevndev/carteira-vacinacao-api:latest
+    image: moisesvndev/carteira-vacinacao-api:latest
     
     container_name: carteira-vacinacao-api
     restart: unless-stopped
