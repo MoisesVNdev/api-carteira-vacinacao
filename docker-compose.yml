@@ -120,12 +120,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      
-      # Argumentos de build
-      args:
-        # Versão do Java (deve corresponder à versão do projeto)
-        JAVA_VERSION: 21
-    
+
     container_name: ${COMPOSE_PROJECT_NAME:-app}-spring
     
     # Reinicia automaticamente em caso de falha
@@ -181,21 +176,10 @@ services:
       SERVER_PORT: 8080
       
       # Configuração de JWT (segurança)
-      JWT_SECRET: ${JWT_SECRET:-MIIEpAIBAAKCAQEA4f5wg5l2hKsTeNem/V41fGnJm6gOdrj8ym3rFkEU/wT8RDtn}
+      # Sem valor padrão: a aplicação não sobe sem um segredo definido no .env
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET é obrigatório (gere com: openssl rand -base64 64)}
       JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
-    
-    # -----------------------------------------------------------------------
-    # VOLUMES
-    # -----------------------------------------------------------------------
-    volumes:
-      # HOT RELOAD: Monta o código-fonte para desenvolvimento
-      # Remove em produção
-      - ./src:/app/src:ro
-      - ./pom.xml:/app/pom.xml:ro
-      
-      # Cache do Maven (acelera builds)
-      - maven_cache:/root/.m2
-    
+
     # -----------------------------------------------------------------------
     # PORTAS
     # -----------------------------------------------------------------------
@@ -245,26 +229,21 @@ services:
     security_opt:
       - no-new-privileges:true
     
-    # Limita capacidades do kernel
+    # Remove todas as capacidades do kernel (a porta 8080 não precisa de nenhuma)
     cap_drop:
       - ALL
-    cap_add:
-      - NET_BIND_SERVICE
 
 # ============================================================================
 # VOLUMES
 # ============================================================================
 # Volumes nomeados para persistência de dados
 volumes:
-  # Dados do PostgreSQL
+  # Dados do PostgreSQL (não usado por padrão: o serviço postgres usa tmpfs,
+  # então o banco é zerado a cada recriação; troque o tmpfs por este volume
+  # se quiser persistir os dados)
   postgres_data:
     driver: local
     name: ${COMPOSE_PROJECT_NAME:-app}_postgres_data
-  
-  # Cache do Maven (acelera builds)
-  maven_cache:
-    driver: local
-    name: ${COMPOSE_PROJECT_NAME:-app}_maven_cache
 
 # ============================================================================
 # REDES
