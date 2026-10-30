@@ -63,7 +63,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             String email = jwtService.extractUsername(token);
-            log.info("Email extraído do token: {}", email);
+            log.debug("Email extraído do token: {}", email);
 
             // Autentica apenas se o contexto ainda estiver vazio (evita reprocessamento)
             if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
@@ -80,7 +80,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
 
-                    log.info("✅ Usuário autenticado via JWT: {} - Authorities: {}", email, userDetails.getAuthorities());
+                    log.debug("Usuário autenticado via JWT: {} - Authorities: {}", email, userDetails.getAuthorities());
                 } else {
                     log.warn("❌ Token inválido ou expirado para: {}", email);
                 }
