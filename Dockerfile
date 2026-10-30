@@ -54,16 +54,16 @@ RUN mvn clean package -DskipTests -B
 # ============================================================================
 # ESTÁGIO 2: RUNTIME
 # ============================================================================
-# Usa Amazon Corretto Alpine (distribuição OpenJDK mantida pela AWS)
-# Imagem otimizada e com melhor suporte de segurança
-FROM amazoncorretto:21-alpine
+# Usa Eclipse Temurin com apenas o JRE (sem compilador e ferramentas do JDK)
+# Imagem menor e com menos superfície de ataque; disponível para amd64 e arm64
+FROM eclipse-temurin:21-jre-alpine
 
 # -----------------------------------------------------------------------
 # METADADOS
 # -----------------------------------------------------------------------
-LABEL maintainer="seu-email@exemplo.com"
-LABEL description="Spring Boot Application"
-LABEL version="1.0.0"
+LABEL maintainer="moisesvn.dev@gmail.com"
+LABEL description="API REST Carteira de Vacinação Digital (Java 21 + Spring Boot)"
+LABEL version="1.0.1"
 
 # -----------------------------------------------------------------------
 # SEGURANÇA: Atualiza pacotes do sistema para corrigir vulnerabilidades
@@ -135,14 +135,15 @@ CMD ["sh", "-c", "java $JAVA_OPTS -Djava.security.egd=file:/dev/./urandom -XX:+U
 # ============================================================================
 # 
 # BUILD:
-# docker build -t minha-api:latest .
+# docker build -t moisesvn/carteira-vacinacao-api:latest .
 #
 # RUN (standalone):
 # docker run -p 8080:8080 \
 #   -e SPRING_DATASOURCE_URL=jdbc:postgresql://host:5432/db \
 #   -e SPRING_DATASOURCE_USERNAME=usuario \
 #   -e SPRING_DATASOURCE_PASSWORD=senha \
-#   minha-api:latest
+#   -e JWT_SECRET="$(openssl rand -base64 64)" \
+#   moisesvn/carteira-vacinacao-api:latest
 #
 # BUILD COM COMPOSE:
 # docker-compose build
