@@ -1,4 +1,4 @@
-# 🐳 Guia Completo: Publicar API no DockerHub (Nível Sênior)
+# 🐳 Guia Completo: Publicar API no DockerHub
 
 Este guia mostra como publicar sua API no DockerHub seguindo as melhores práticas de um desenvolvedor sênior: versionamento semântico, CI/CD automatizado, segurança e documentação.
 
